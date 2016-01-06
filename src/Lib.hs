@@ -23,15 +23,15 @@ instance FromJSON AppCfg
 instance ToJSON AppCfg
 
 data Thing = Thing
-  { thingId        :: Int
+  { files        :: [FilePath]
   } deriving (Eq, Show, GHC.Generic)
 
-parsething :: String -> Thing
-parsething inp = let [tid] = words inp 
+parseThing :: String -> Thing
+parseThing inp = let [tid] = words inp 
                 in Thing (read tid)
 
-serializething :: Thing -> String
-serializething (Thing tid) = show tid ++ "\n"
+serializeThing :: Thing -> String
+serializeThing (Thing tid) = show tid ++ "\n"
 
 instance FromJSON Thing
 instance ToJSON Thing
@@ -57,17 +57,14 @@ server = enter monadNatTransform server'
         getThings :: ReaderT FilePath IO [Thing]
         getThings = do
           path <- ask 
-          liftIO $ map parsething . lines <$> readFile path
+          liftIO $ map parseThing . lines <$> readFile path
       
         postThing :: Thing -> ReaderT FilePath IO ()
         postThing thing = do
           path <- ask
-          liftIO $ appendFile path (serializething thing)
+          liftIO $ appendFile path (serializeThing thing)
 
     monadNatTransform :: ReaderT FilePath IO :~> EitherT ServantErr IO
-    monadNatTransform = Nat $ monadNatTransform'
-      where
-        monadNatTransform' :: forall a. ReaderT FilePath IO a -> EitherT ServantErr IO a
-        monadNatTransform' r = do
+    monadNatTransform = Nat $ \r -> do
           t <- liftIO $ runReaderT r "aux/data"
           return t
