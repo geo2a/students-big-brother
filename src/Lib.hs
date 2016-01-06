@@ -1,7 +1,8 @@
-{-# LANGUAGE DataKinds       #-}
-{-# LANGUAGE TypeOperators   #-}
-{-# LANGUAGE DeriveGeneric   #-}
-{-# LANGUAGE RankNTypes   #-}
+{-# LANGUAGE DataKinds      
+           , TypeOperators   
+           , DeriveGeneric   
+           , RankNTypes   
+           , OverloadedStrings #-}
 
 module Lib where
 
@@ -9,6 +10,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Either
 import Control.Monad.Trans.Reader
 import qualified GHC.Generics as GHC
+import qualified Data.Text as Text
 import Data.Aeson
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -22,19 +24,24 @@ data AppCfg = AppCfg
 instance FromJSON AppCfg
 instance ToJSON AppCfg
 
+-- | Text file with source code
+data SourceFile = SourceFile FilePath Text.Text 
+  deriving (Eq, Show, Read, GHC.Generic)
+
+instance FromJSON SourceFile
+instance ToJSON SourceFile
+
 data Thing = Thing
-  { files        :: [FilePath]
-  } deriving (Eq, Show, GHC.Generic)
-
-parseThing :: String -> Thing
-parseThing inp = let [tid] = words inp 
-                in Thing (read tid)
-
-serializeThing :: Thing -> String
-serializeThing (Thing tid) = show tid ++ "\n"
+  { files        :: [SourceFile]
+  } deriving (Eq, Show, Read, GHC.Generic)
 
 instance FromJSON Thing
 instance ToJSON Thing
+
+parseThing :: String -> Thing
+parseThing = read
+serializeThing :: Thing -> String
+serializeThing ts = show ts ++ "\n"
 
 type API = "things" :> 
   (Get '[JSON] [Thing] :<|> ReqBody '[JSON] Thing :> Post '[JSON] ()) 
