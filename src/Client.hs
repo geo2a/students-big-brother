@@ -41,21 +41,18 @@ import API
 
 type RefreshInterval = Int
 
-data AppConfig = AppConfig 
+data ClientConfig = ClientConfig 
   { directory         :: FilePath -- ^ path directory to watch 
   , refreshRate       :: RefreshInterval -- ^ refresh rate in seconds 
   , ignore            :: [FilePath] -- ^ list of ignored files
   } deriving (Typeable, Show, GHC.Generic)
 
-instance FromJSON AppConfig
-instance ToJSON AppConfig
-
---instance FromJSON Thing
---instance ToJSON Thing
+instance FromJSON ClientConfig
+instance ToJSON ClientConfig
 
 -- | Type alias for effects set, demanded by application
 type DemandedEffects r = 
-  ( Member (Reader AppConfig) r
+  ( Member (Reader ClientConfig) r
   , Member (State Thing)   r 
   , SetMember Lift (Lift IO)  r
   )
@@ -70,7 +67,7 @@ getThings :<|> postThings = client api (BaseUrl Http "localhost" 8083)
 ---- Parsing Configurations ----
 --------------------------------
 
-readConfig :: FilePath -> IO AppConfig
+readConfig :: FilePath -> IO ClientConfig
 readConfig fname = do
   contents <- BS.readFile fname
   case eitherDecode contents of 
@@ -86,12 +83,13 @@ loop :: DemandedEffects r => Eff r ()
 loop = do
   cfg <- ask
   st@(Thing prevFilesList) <- get  
+  
   currentFilesList <- lift $ getDirectoryContents $ directory cfg
   let currentFilesList' = currentFilesList \\ ignore cfg
   filesContents <- lift $ mapM Text.IO.readFile currentFilesList'
   put $ Thing (zipWith SourceFile currentFilesList' filesContents)
-  lift $ print currentFilesList'
-  lift $ runEitherT $ postThings st
+  
+  lift $ runEitherT $ postThings st -- send files to server
   lift $ threadDelay $ refreshRate cfg
   loop
 
@@ -105,11 +103,9 @@ runApp action cfg initState =
 
 startClientDaemon :: String -> IO ()
 startClientDaemon cfgFileName = do  
-  --cfg <- readConfig cfgFileName
-  let cfg = AppConfig "/home/geo2a/Desktop/t" 1000000 [".", ".."]
+  cfg <- readConfig cfgFileName
   setCurrentDirectory $ directory cfg 
-  runApp loop cfg (Thing [])
+  runApp loop cfg initState
   return ()
     where
-      greetings =
-        putStrLn "File Trigger, v0.1"
+      initState = Thing []

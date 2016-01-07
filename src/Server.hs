@@ -1,6 +1,7 @@
 {-# LANGUAGE TypeOperators   
            , DeriveGeneric   
-           , OverloadedStrings #-}
+           , OverloadedStrings
+           , FlexibleContexts #-}
 
 module Server where
 
@@ -10,22 +11,26 @@ import Control.Monad.Trans.Reader
 import qualified GHC.Generics as GHC
 import qualified Data.Text as Text
 import Data.Aeson
-import Network.Wai
 import Network.Wai.Handler.Warp
+import Network.Wai 
 import Servant
 
 import API
 
--- | App configuration 
-data AppCfg = AppCfg 
-  { db :: FilePath -- ^ database file
+-- | Server configuration 
+data ServerConfig = ServerConfig 
+  { port :: Int
+  , db :: FilePath -- ^ database file
   } deriving (GHC.Generic)
 
-instance FromJSON AppCfg
-instance ToJSON AppCfg
+serverCfg :: ServerConfig
+serverCfg = ServerConfig {port = 8083, db = "aux/data"}
+
+instance FromJSON ServerConfig
+instance ToJSON ServerConfig
 
 startServer :: String -> IO ()
-startServer cfgFileName = run 8083 app
+startServer cfgFileName = run (port serverCfg) app
 
 app :: Application
 app = serve api server
@@ -33,20 +38,20 @@ app = serve api server
 server :: Server API
 server = enter monadNatTransform server'
   where 
-    server' :: ServerT API (ReaderT FilePath IO)
+    server' :: ServerT API (ReaderT ServerConfig IO)
     server' = getThings :<|> postThing 
       where
-        getThings :: ReaderT FilePath IO [Thing]
+        getThings :: ReaderT ServerConfig IO [Thing]
         getThings = do
-          path <- ask 
-          liftIO $ map parseThing . lines <$> readFile path
+          cfg <- ask 
+          liftIO $ map parseThing . lines <$> readFile (db cfg)
       
-        postThing :: Thing -> ReaderT FilePath IO ()
+        postThing :: Thing -> ReaderT ServerConfig IO ()
         postThing thing = do
-          path <- ask
-          liftIO $ writeFile path (serializeThing thing)
+          cfg <- ask
+          liftIO $ writeFile (db cfg) (serializeThing thing)
 
-    monadNatTransform :: ReaderT FilePath IO :~> EitherT ServantErr IO
+    monadNatTransform :: ReaderT ServerConfig IO :~> EitherT ServantErr IO
     monadNatTransform = Nat $ \r -> do
-          t <- liftIO $ runReaderT r "aux/data"
+          t <- liftIO $ runReaderT r serverCfg
           return t

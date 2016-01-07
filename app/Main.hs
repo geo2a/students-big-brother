@@ -15,7 +15,7 @@ main = do
     ["--server", cfg] -> startServer cfg
     _          -> putStr help
 
---| Help message
+-- | Help message
 help :: String
 help = "Students Big Brother v0.1 \n\
        \Usage: \n\
