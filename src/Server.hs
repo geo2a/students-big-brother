@@ -44,7 +44,7 @@ server = enter monadNatTransform server'
         postThing :: Thing -> ReaderT FilePath IO ()
         postThing thing = do
           path <- ask
-          liftIO $ appendFile path (serializeThing thing)
+          liftIO $ writeFile path (serializeThing thing)
 
     monadNatTransform :: ReaderT FilePath IO :~> EitherT ServantErr IO
     monadNatTransform = Nat $ \r -> do
