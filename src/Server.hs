@@ -44,8 +44,8 @@ server = enter monadNatTransform server'
     server' :: ServerT API (ReaderT ServerConfig IO)
     server' = getFiles :<|> postFiles
       where
-        getFiles :: ReaderT ServerConfig IO [SourceFile]
-        getFiles = do
+        getFiles :: UserID -> ReaderT ServerConfig IO [SourceFile]
+        getFiles uid = do
           cfg <- ask 
           dbConnection <- liftIO $ dbConnect $ db cfg
           rows <- liftIO $ selectAllFiles dbConnection
@@ -53,11 +53,11 @@ server = enter monadNatTransform server'
           return . map snd $ rows
 
       
-        postFiles :: [SourceFile] -> ReaderT ServerConfig IO ()
-        postFiles files = do
+        postFiles :: UserID -> [SourceFile] -> ReaderT ServerConfig IO ()
+        postFiles uid files = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
-          liftIO $ updateClientFiles dbConnection 666 files 
+          liftIO $ updateClientFiles dbConnection uid files 
           liftIO $ dbDisconnect dbConnection
 
     monadNatTransform :: ReaderT ServerConfig IO :~> EitherT ServantErr IO

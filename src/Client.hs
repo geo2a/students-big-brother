@@ -43,7 +43,8 @@ import API
 type RefreshInterval = Int
 
 data ClientConfig = ClientConfig 
-  { directory         :: FilePath -- ^ path directory to watch 
+  { userID            :: UserID
+  , directory         :: FilePath -- ^ path directory to watch 
   , refreshRate       :: RefreshInterval -- ^ refresh rate in seconds 
   , ignore            :: [FilePath] -- ^ list of ignored files
   } deriving (Typeable, Show, GHC.Generic)
@@ -92,7 +93,7 @@ loop = do
       filesContents <- lift $ mapM Text.IO.readFile currentFilesList
       let newState = zipWith SourceFile currentFilesList filesContents
       put newState
-      lift $ runEitherT $ postFiles newState -- send files to server
+      lift $ runEitherT $ postFiles (userID cfg) newState -- send files to server
       return ()
   lift $ threadDelay $ refreshRate cfg 
   loop
