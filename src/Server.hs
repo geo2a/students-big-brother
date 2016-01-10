@@ -1,7 +1,9 @@
 {-# LANGUAGE TypeOperators   
            , DeriveGeneric   
            , OverloadedStrings
-           , FlexibleContexts #-}
+           , FlexibleContexts
+           , TemplateHaskell
+           , QuasiQuotes #-}
 
 module Server where
 
@@ -16,15 +18,16 @@ import Network.Wai
 import Servant
 
 import API
+import DB
 
 -- | Server configuration 
 data ServerConfig = ServerConfig 
   { port :: Int
-  , db :: FilePath -- ^ database file
+  , db :: DatabaseConfig -- ^ database connection params
   } deriving (GHC.Generic)
 
 serverCfg :: ServerConfig
-serverCfg = ServerConfig {port = 8083, db = "aux/data"}
+serverCfg = ServerConfig {port = 8083, db = defaultDatabaseConfig}
 
 instance FromJSON ServerConfig
 instance ToJSON ServerConfig
@@ -39,17 +42,23 @@ server :: Server API
 server = enter monadNatTransform server'
   where 
     server' :: ServerT API (ReaderT ServerConfig IO)
-    server' = getThings :<|> postThing 
+    server' = getFiles :<|> postFiles
       where
-        getThings :: ReaderT ServerConfig IO [Thing]
-        getThings = do
+        getFiles :: ReaderT ServerConfig IO [SourceFile]
+        getFiles = do
           cfg <- ask 
-          liftIO $ map parseThing . lines <$> readFile (db cfg)
+          dbConnection <- liftIO $ dbConnect $ db cfg
+          rows <- liftIO $ selectAllFiles dbConnection
+          liftIO $ dbDisconnect dbConnection
+          return . map snd $ rows
+
       
-        postThing :: Thing -> ReaderT ServerConfig IO ()
-        postThing thing = do
+        postFiles :: [SourceFile] -> ReaderT ServerConfig IO ()
+        postFiles files = do
           cfg <- ask
-          liftIO $ writeFile (db cfg) (serializeThing thing)
+          dbConnection <- liftIO $ dbConnect $ db cfg
+          liftIO $ updateClientFiles dbConnection 666 files 
+          liftIO $ dbDisconnect dbConnection
 
     monadNatTransform :: ReaderT ServerConfig IO :~> EitherT ServantErr IO
     monadNatTransform = Nat $ \r -> do

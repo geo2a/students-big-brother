@@ -6,7 +6,8 @@
              ConstraintKinds,
              DataKinds,
              TypeOperators,
-             RankNTypes #-}
+             RankNTypes,
+             ScopedTypeVariables #-}
 
 module Client where
 
@@ -53,7 +54,7 @@ instance ToJSON ClientConfig
 -- | Type alias for effects set, demanded by application
 type DemandedEffects r = 
   ( Member (Reader ClientConfig) r
-  , Member (State Thing)   r 
+  , Member (State [SourceFile])   r 
   , SetMember Lift (Lift IO)  r
   )
 
@@ -61,7 +62,7 @@ type DemandedEffects r =
 ---- Auto generated functions to query servers HTTP API ----
 ------------------------------------------------------------
 
-getThings :<|> postThings = client api (BaseUrl Http "localhost" 8083)
+getFiles :<|> postFiles = client api (BaseUrl Http "localhost" 8083)
 
 --------------------------------
 ---- Parsing Configurations ----
@@ -82,17 +83,22 @@ readConfig fname = do
 loop :: DemandedEffects r => Eff r ()
 loop = do
   cfg <- ask
-  st@(Thing prevFilesList) <- get  
+  (state :: [SourceFile]) <- get  
   
-  currentFilesList <- lift $ getDirectoryContents $ directory cfg
-  let currentFilesList' = currentFilesList \\ ignore cfg
-  filesContents <- lift $ mapM Text.IO.readFile currentFilesList'
-  put $ Thing (zipWith SourceFile currentFilesList' filesContents)
-  
-  lift $ runEitherT $ postThings st -- send files to server
-  lift $ threadDelay $ refreshRate cfg
+  currentFilesList <- (\\ ignore cfg) <$> (lift $ getDirectoryContents $ directory cfg) 
+  let previousFilesList = map path state
+  when (not . null $ currentFilesList `symmetricDiff` previousFilesList) $ do
+      lift $ putStrLn ("Current files list: " ++ show currentFilesList)
+      filesContents <- lift $ mapM Text.IO.readFile currentFilesList
+      let newState = zipWith SourceFile currentFilesList filesContents
+      put newState
+      lift $ runEitherT $ postFiles newState -- send files to server
+      return ()
+  lift $ threadDelay $ refreshRate cfg 
   loop
-
+    where 
+      symmetricDiff :: Eq a => [a] -> [a] -> [a]
+      symmetricDiff xs ys = (xs `union` ys) \\ (xs `intersect` ys)
 -----------------------------
 ---- Loop Event handlers ----
 -----------------------------
@@ -105,7 +111,7 @@ startClientDaemon :: String -> IO ()
 startClientDaemon cfgFileName = do  
   cfg <- readConfig cfgFileName
   setCurrentDirectory $ directory cfg 
-  runApp loop cfg initState
+  runApp loop (cfg :: ClientConfig) (initState :: [SourceFile])
   return ()
     where
-      initState = Thing []
+      initState = []
