@@ -45,13 +45,13 @@ server = enter monadNatTransform server'
     server' :: ServerT API (ReaderT ServerConfig IO)
     server' = getFiles :<|> updateFilesList
       where
-        getFiles :: ReaderT ServerConfig IO [SourceFile]
+        getFiles :: ReaderT ServerConfig IO [OwnedSourceFile]
         getFiles = do
           cfg <- ask 
           dbConnection <- liftIO $ dbConnect $ db cfg
           rows <- liftIO $ selectAllFiles dbConnection
           liftIO $ dbDisconnect dbConnection
-          return . map snd $ rows
+          return rows
         
         -- | Substitute existing files list with given 
         updateFilesList :: UserID -> [SourceFile] -> ReaderT ServerConfig IO ()

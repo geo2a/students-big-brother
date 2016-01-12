@@ -9,7 +9,7 @@ import Servant.HTML.Lucid (HTML)
 import Types
 
 type API = 
-  "files" :> Get '[JSON, HTML] [SourceFile]
+  "files" :> Get '[JSON, HTML] [OwnedSourceFile]
   :<|> 
   "files" :> Capture "userid" UserID :> ReqBody '[JSON] [SourceFile] :> Post '[JSON] ()
 

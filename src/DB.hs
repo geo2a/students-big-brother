@@ -31,10 +31,10 @@ type DatabaseConfig = ConnectInfo
 
 type ClientID = Int
 
--- | Temporary function, will be substituted by ToRow and ToField instances
-sourceFileToTableRow :: ClientID -> SourceFile -> (ClientID, FilePath,Text.Text)
-sourceFileToTableRow clientID (SourceFile path contents) = 
-  (clientID, path, contents)
+---- | Temporary function, will be substituted by ToRow and ToField instances
+--sourceFileToTableRow :: ClientID -> SourceFile -> (ClientID, FilePath,Text.Text)
+--sourceFileToTableRow clientID (SourceFile path contents) = 
+--  (clientID, path, contents)
 
 defaultDatabaseConfig :: DatabaseConfig
 defaultDatabaseConfig = 
@@ -51,13 +51,14 @@ dbConnect = connect
 dbDisconnect :: Connection -> IO ()
 dbDisconnect = close 
 
-selectAllFiles :: Connection -> IO [(ClientID, SourceFile)] 
+selectAllFiles :: Connection -> IO [OwnedSourceFile] 
 selectAllFiles conn = do
   rows <- query_ conn [sql| select * from files |] :: 
               IO [(Integer, ClientID, FilePath, Text.Text)]
   return $ map readRow rows
     where 
-      readRow (_, cid, path, contents) = (cid, SourceFile path contents)
+      readRow (_, cid, path, contents) = 
+        OwnedSourceFile cid (SourceFile path contents)
 
 insertFile :: Connection -> ClientID -> SourceFile -> IO ()
 insertFile conn clientID (SourceFile path contents) =
