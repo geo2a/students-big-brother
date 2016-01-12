@@ -25,6 +25,8 @@ executable students-big-brother-exe
                      , aeson
                      , servant-server
                      , servant-client
+                     , servant-lucid
+                     , lucid
                      , wai
                      , warp
                      , extensible-effects

@@ -19,6 +19,7 @@ import Servant
 
 import API
 import DB
+import Types
 
 -- | Server configuration 
 data ServerConfig = ServerConfig 
@@ -42,19 +43,19 @@ server :: Server API
 server = enter monadNatTransform server'
   where 
     server' :: ServerT API (ReaderT ServerConfig IO)
-    server' = getFiles :<|> postFiles
+    server' = getFiles :<|> updateFilesList
       where
-        getFiles :: UserID -> ReaderT ServerConfig IO [SourceFile]
-        getFiles uid = do
+        getFiles :: ReaderT ServerConfig IO [SourceFile]
+        getFiles = do
           cfg <- ask 
           dbConnection <- liftIO $ dbConnect $ db cfg
           rows <- liftIO $ selectAllFiles dbConnection
           liftIO $ dbDisconnect dbConnection
           return . map snd $ rows
-
-      
-        postFiles :: UserID -> [SourceFile] -> ReaderT ServerConfig IO ()
-        postFiles uid files = do
+        
+        -- | Substitute existing files list with given 
+        updateFilesList :: UserID -> [SourceFile] -> ReaderT ServerConfig IO ()
+        updateFilesList uid files = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
           liftIO $ updateClientFiles dbConnection uid files 

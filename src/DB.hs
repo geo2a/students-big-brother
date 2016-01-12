@@ -16,6 +16,7 @@ import Database.PostgreSQL.Simple.ToField
 import Database.PostgreSQL.Simple.SqlQQ
 
 import API
+import Types
 
 --------------------------------------------
 ---- Types and instances for PostgreSQL ----

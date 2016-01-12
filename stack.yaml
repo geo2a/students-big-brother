@@ -4,5 +4,6 @@ packages:
 - '.'
 extra-deps:
 - extensible-effects-1.11.0.0
+- servant-lucid-0.4.4.5
 - type-aligned-0.9.6
 resolver: lts-3.15

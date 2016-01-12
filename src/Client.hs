@@ -35,6 +35,7 @@ import Servant
 import Servant.Client
 
 import API
+import Types 
 
 ----------------------
 ---- Domain Types ----
@@ -63,7 +64,8 @@ type DemandedEffects r =
 ---- Auto generated functions to query servers HTTP API ----
 ------------------------------------------------------------
 
-getFiles :<|> postFiles = client api (BaseUrl Http "localhost" 8083)
+-- | Consult Server module (Server.hs) for API documentation
+getFiles :<|> updateFilesList = client api (BaseUrl Http "localhost" 8083)
 
 --------------------------------
 ---- Parsing Configurations ----
@@ -93,7 +95,7 @@ loop = do
       filesContents <- lift $ mapM Text.IO.readFile currentFilesList
       let newState = zipWith SourceFile currentFilesList filesContents
       put newState
-      lift $ runEitherT $ postFiles (userID cfg) newState -- send files to server
+      lift $ runEitherT $ updateFilesList (userID cfg) newState -- send files to server
       return ()
   lift $ threadDelay $ refreshRate cfg 
   loop
