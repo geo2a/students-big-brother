@@ -79,9 +79,10 @@ body {
 
 
 </style>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/styles/default.min.css">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/styles/github.min.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/languages/haskell.min.js"></script>
+
 
 <script type = "text/javascript" 
         src = "http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js">
@@ -170,6 +171,10 @@ function sourceFileJSONtoDOM(file) {
     result.appendChild(h);
     result.appendChild(pre);
 
+    hljs.configure({
+      languages: ["haskell", "cpp", "c", "h", "hpp", 
+                  "pascal", "java", "csharp", "python"]
+    });
     hljs.highlightBlock(pre);
     
     return result;
