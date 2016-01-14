@@ -5,103 +5,193 @@
 <title>Students Big Brother</title>
 
 <style>
-  
-    body {
-        background-image: url("resources/background.jpg");
-    }
 
-    .container {
-        background-color: white;
-        width: 800px;
-        padding: 10px;
-        margin: auto;
-        border-radius: 3px;
-        box-shadow: 0px 0px 10px 7px rgba(88,88,88,0.25);
-    }
+body {
+    background-image: url("resources/background.jpg");
+    width: 800px;
+    margin: auto;
+    padding: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.5;
+    font-size: 14px;        
+}
 
-    .students-list-container {
-        margin-top: 20px;
-        margin-bottom: 50px;
-        width: 1000px;
-    }
+.tabs-menu {
+    height: 30px;
+    float: left;
+    clear: both;
+}
 
-    .main-container {
-     
-    }
+.tabs-menu li {
+    list-style-type: none;
+    height: 30px;
+    line-height: 30px;
+    float: left;
+    margin-right: 10px;
+    background-color: #ccc;
+    border-top: 1px solid #d4d4d1;
+    border-right: 1px solid #d4d4d1;
+    border-left: 1px solid #d4d4d1;
+}
 
-    .student-icon {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 2px solid #3F51B5;
-        margin: 5px;
-    }
+.tabs-menu li.current {
+    position: relative;
+    background-color: #fff;
+    border-bottom: 1px solid #fff;
+    z-index: 5;
+}
+
+.tabs-menu li a {
+    padding: 10px;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none; 
+}
+
+.tabs-menu .current a {
+    color: #2e7da3;
+}
+
+.tab {
+    display: none;
+    border: 1px solid #d4d4d1;
+    background-color: #fff;
+    float: left;
+    margin-bottom: 20px;
+    width: auto;
+}
+
+.tab-content {
+    width: 660px;
+    padding: 20px;
+    display: none;
+}
+
+.tab-content li {
+    list-style-type: none;
+    border-bottom: thin solid #888888;
+}
+
+.tab-content .source-code {
+    font-family: monospace;
+}
+
+#tab-1 {
+ display: block;   
+}
+
+
 
 </style>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/styles/default.min.css">
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
 
 <script type = "text/javascript" 
         src = "http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js">
 </script>
 <script src="lodash.js"></script>
 <script type="text/javascript">
-    $(document).ready(function(){
-        var xmlhttp = new XMLHttpRequest();
-        var url = "http://127.0.0.1:8083/files";
 
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                var sourceFiles = JSON.parse(xmlhttp.responseText);
-                
-                // calculate unique user ids
-                var uids = _.chain(sourceFiles)
-                    .map(function(file) {
-                        return file.uid;
+$(document).ready(function() {
+    var xmlhttp = new XMLHttpRequest();
+    var url = "http://127.0.0.1:8083/files";
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var sourceFiles = JSON.parse(xmlhttp.responseText);
+            
+            // calculate unique user ids
+            var uids = _.chain(sourceFiles)
+                .map(function(file) {
+                    return file.uid;
+                })
+                .uniq()
+                .value();
+
+            var groupedFiles = _.chain(sourceFiles)
+                .groupBy(function(x) {return x.uid;})
+                .value();
+
+            // build students list on the ui
+            var studentTabs = document.getElementById("tabs");
+            var studentTabsContents = document.getElementById("tabs-contents");
+
+            _.forEach(uids, function(uid) {
+                // students tabs list
+                var studentTab = document.createElement("li");
+                var a = document.createElement('a');
+                a.href =  "#tab-" + uid;  
+                a.innerHTML = "Student " + uid; 
+                studentTab.appendChild(a);
+                studentTabs.appendChild(studentTab);
+
+                // students tabs contents
+                var tabContent = document.createElement("div");
+                tabContent.id = "tab-" + uid;
+                tabContent.className = "tab-content";
+                var filesOfThisUser = _.chain(groupedFiles[uid])
+                    .map(function (x) {
+                        return x.file;})
+                    .map(sourceFileJSONtoDOM)
+                    .map(function(fileNode) {
+                        var li = document.createElement("li");
+                        li.appendChild(fileNode);
+                        return li;
                     })
-                    .uniq()
                     .value();
-                console.log(uids);
-
-                // build students list on the ui
-                var studsList = document.getElementById("students-list");
-
-                _.forEach(uids, function(uid) {
-                    var studIcon = document.createElement("div");
-                    studIcon.setAttribute("class", "student-icon");
-                    studIcon.appendChild(document.createTextNode(
-                        uid
-                    ));
-                    studsList.appendChild(studIcon);
+                var ul = document.createElement("ul");
+                _.forEach(filesOfThisUser, function(li) {
+                    ul.appendChild(li);
                 });
+                tabContent.appendChild(
+                    ul
+                );
+                studentTabsContents.appendChild(tabContent);
+            });
+        }
 
-                // console.log(sourceFiles);
-                // var list = document.getElementById("files-list");
-                // for (var i in sourceFiles) {
-                //     var listItem = document.createElement("li");
-                //     listItem.appendChild(document.createTextNode(
-                //         JSON.stringify(sourceFiles[i], null, 2)
-                //     ));
-                //     list.appendChild(listItem);
-                // }
-            }
-        };
+        $(".tabs-menu a").click(function(event) {
+            $(".tab").css("display", "block");
+            event.preventDefault();
+            $(this).parent().addClass("current");
+            $(this).parent().siblings().removeClass("current");
+            var tab = $(this).attr("href");
+            $(".tab-content").not(tab).css("display", "none");
+            $(tab).fadeIn();
+        });
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+});
 
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-    });
+function sourceFileJSONtoDOM(file) {
+    var h = document.createElement("h3");
+    h.innerHTML = file.path;
+    var code = document.createElement("code");
+    code.className = "source-code";
+    code.innerHTML = file.contents;
+    var pre = document.createElement("pre");
+    pre.appendChild(code);
+    var result = document.createElement("div");
+    result.appendChild(h);
+    result.appendChild(pre);
+
+    hljs.highlightBlock(pre);
+    
+    return result;
+} 
 
 </script>
 
 </head>
 <body>
 
-<div class="container students-list-container" id="students-list">
-</div>
-
-<div class="container main-container">
-    Students files
-    <ul id="files-list">
-        
+<div id="tabs-container">
+    <ul class="tabs-menu" id="tabs">
     </ul>
+    <div class="tab" id="tabs-contents">
+    </div>
 </div>
 
 </body>
