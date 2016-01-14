@@ -25,7 +25,7 @@ import System.Process
 import System.Directory
 import System.FilePath
 import qualified Data.ByteString.Lazy as BS
-import Data.Time.Clock
+import Data.Time.Clock (UTCTime)
 import Data.List
 import Data.Typeable
 import Data.Aeson
@@ -43,6 +43,8 @@ import Types
 
 type RefreshInterval = Int
 
+type ModificationTime = UTCTime
+
 data ClientConfig = ClientConfig 
   { userID            :: UserID
   , directory         :: FilePath -- ^ path directory to watch 
@@ -50,13 +52,15 @@ data ClientConfig = ClientConfig
   , ignore            :: [FilePath] -- ^ list of ignored files
   } deriving (Typeable, Show, GHC.Generic)
 
+type ClientState = [(SourceFile, ModificationTime)]
+
 instance FromJSON ClientConfig
 instance ToJSON ClientConfig
 
 -- | Type alias for effects set, demanded by application
 type DemandedEffects r = 
   ( Member (Reader ClientConfig) r
-  , Member (State [SourceFile])   r 
+  , Member (State ClientState)   r 
   , SetMember Lift (Lift IO)  r
   )
 
@@ -86,15 +90,18 @@ readConfig fname = do
 loop :: DemandedEffects r => Eff r ()
 loop = do
   cfg <- ask
-  (state :: [SourceFile]) <- get  
+  (state :: ClientState) <- get  
   
   currentFilesList <- (\\ ignore cfg) <$> (lift $ getDirectoryContents $ directory cfg) 
-  let previousFilesList = map path state
-  when (not . null $ currentFilesList `symmetricDiff` previousFilesList) $ do
+  modificationTimes <- lift $ mapM getModificationTime currentFilesList
+  let timedCurrentFilesList = zip currentFilesList modificationTimes 
+  let timedPreviousFilesList = map (\(f, t) -> (path f, t)) state
+  when (not . null $ 
+    timedCurrentFilesList `symmetricDiff` timedPreviousFilesList) $ do
       lift $ putStrLn ("Current files list: " ++ show currentFilesList)
       filesContents <- lift $ mapM Text.IO.readFile currentFilesList
-      let newState = zipWith SourceFile currentFilesList filesContents
-      put newState
+      let newState = zipWith SourceFile currentFilesList filesContents 
+      put (zip newState modificationTimes)
       lift $ runEitherT $ updateFilesList (userID cfg) newState -- send files to server
       return ()
   lift $ threadDelay $ refreshRate cfg 
@@ -102,9 +109,10 @@ loop = do
     where 
       symmetricDiff :: Eq a => [a] -> [a] -> [a]
       symmetricDiff xs ys = (xs `union` ys) \\ (xs `intersect` ys)
------------------------------
----- Loop Event handlers ----
------------------------------
+
+--------------------------
+---- Sevice functions ----
+--------------------------
 
 -- | Handles all effects produced by application. 
 runApp action cfg initState = 
@@ -114,7 +122,7 @@ startClientDaemon :: String -> IO ()
 startClientDaemon cfgFileName = do  
   cfg <- readConfig cfgFileName
   setCurrentDirectory $ directory cfg 
-  runApp loop (cfg :: ClientConfig) (initState :: [SourceFile])
+  runApp loop (cfg :: ClientConfig) (initState :: ClientState)
   return ()
     where
       initState = []
