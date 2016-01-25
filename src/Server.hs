@@ -12,6 +12,7 @@ import Control.Monad.Trans.Either
 import Control.Monad.Trans.Reader
 import qualified GHC.Generics as GHC
 import qualified Data.Text as Text
+import qualified Data.ByteString.Lazy as BS
 import Data.Aeson
 import Network.Wai.Handler.Warp
 import Network.Wai 
@@ -30,11 +31,20 @@ data ServerConfig = ServerConfig
 serverCfg :: ServerConfig
 serverCfg = ServerConfig {port = 8083, db = defaultDatabaseConfig}
 
+readServerConfig :: FilePath -> IO ServerConfig
+readServerConfig fname = do
+  contents <- BS.readFile fname
+  case eitherDecode contents of
+    Left errMsg -> error errMsg
+    Right cfg   -> return cfg
+
 instance FromJSON ServerConfig
 instance ToJSON ServerConfig
 
 startServer :: String -> IO ()
-startServer cfgFileName = run (port serverCfg) app
+startServer cfgFileName = do
+  cfg <- readServerConfig cfgFileName
+  run (port cfg) app
 
 app :: Application
 app = serve api server

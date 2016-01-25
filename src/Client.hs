@@ -75,8 +75,8 @@ getFiles :<|> updateFilesList = client api (BaseUrl Http "localhost" 8083)
 ---- Parsing Configurations ----
 --------------------------------
 
-readConfig :: FilePath -> IO ClientConfig
-readConfig fname = do
+readClientConfig :: FilePath -> IO ClientConfig
+readClientConfig fname = do
   contents <- BS.readFile fname
   case eitherDecode contents of 
     Left errMsg -> error errMsg
@@ -120,7 +120,7 @@ runApp action cfg initState =
 
 startClientDaemon :: String -> IO ()
 startClientDaemon cfgFileName = do  
-  cfg <- readConfig cfgFileName
+  cfg <- readClientConfig cfgFileName
   setCurrentDirectory $ directory cfg 
   runApp loop (cfg :: ClientConfig) (initState :: ClientState)
   return ()

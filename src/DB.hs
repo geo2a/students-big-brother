@@ -38,7 +38,7 @@ type ClientID = Int
 
 defaultDatabaseConfig :: DatabaseConfig
 defaultDatabaseConfig = 
-  ConnectInfo { connectHost = "172.17.0.2"
+  ConnectInfo { connectHost = "172.17.0.3"
               , connectPort = 5432
               , connectUser = "root"
               , connectPassword = "123"
