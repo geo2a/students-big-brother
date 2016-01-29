@@ -26,7 +26,7 @@ import Types
 data ServerConfig = ServerConfig 
   { port :: Int
   , db :: DatabaseConfig -- ^ database connection params
-  } deriving (GHC.Generic)
+  } deriving (Show, Eq, GHC.Generic)
 
 serverCfg :: ServerConfig
 serverCfg = ServerConfig {port = 8083, db = defaultDatabaseConfig}
