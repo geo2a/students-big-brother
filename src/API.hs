@@ -8,10 +8,16 @@ import Servant.HTML.Lucid (HTML)
 
 import Types
 
+type TeachersAPI = 
+  "files" :> Get '[JSON] [OwnedSourceFile]
+
+type StudentsDaemonAPI = "files" :> 
+  Capture "userid" UserID :> ReqBody '[JSON] [SourceFile] :> Post '[JSON] () 
+
 type API = 
-  "files" :> Get '[JSON, HTML] [OwnedSourceFile]
+  TeachersAPI
   :<|> 
-  "files" :> Capture "userid" UserID :> ReqBody '[JSON] [SourceFile] :> Post '[JSON] ()
+  StudentsDaemonAPI
 
 --type API = "files" :> Capture "userid" UserID :>  
 --  (Get '[JSON] [SourceFile] :<|> ReqBody '[JSON] [SourceFile] :> Post '[JSON] ()) 

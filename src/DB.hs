@@ -31,11 +31,6 @@ type DatabaseConfig = ConnectInfo
 
 type ClientID = Int
 
----- | Temporary function, will be substituted by ToRow and ToField instances
---sourceFileToTableRow :: ClientID -> SourceFile -> (ClientID, FilePath,Text.Text)
---sourceFileToTableRow clientID (SourceFile path contents) = 
---  (clientID, path, contents)
-
 defaultDatabaseConfig :: DatabaseConfig
 defaultDatabaseConfig = 
   ConnectInfo { connectHost = "172.17.0.3"
@@ -74,5 +69,4 @@ updateClientFiles conn clientID files = do
   |] (Only clientID)
   mapM_ (insertFile conn clientID) files 
   
---insert into files(clientID, filePath, fileContents) values (1, 'main.hs', 'lalalalalala');
 

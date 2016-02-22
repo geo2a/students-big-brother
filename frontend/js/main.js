@@ -81,7 +81,8 @@ function sourceFileJSONtoDOM(file) {
 
     hljs.configure({
       languages: ["haskell", "cpp", "c", "h", "hpp", 
-                  "pascal", "java", "csharp", "python"]
+                  "pascal", "java", "csharp", "python",
+                  "html", "css", "js"]
     });
     hljs.highlightBlock(pre);
     
