@@ -31,15 +31,6 @@ type DatabaseConfig = ConnectInfo
 
 type ClientID = Int
 
-defaultDatabaseConfig :: DatabaseConfig
-defaultDatabaseConfig = 
-  ConnectInfo { connectHost = "172.17.0.3"
-              , connectPort = 5432
-              , connectUser = "root"
-              , connectPassword = "123"
-              , connectDatabase = "students_big_brother_db" 
-              }
-
 dbConnect :: DatabaseConfig -> IO Connection
 dbConnect = connect 
 

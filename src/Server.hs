@@ -28,9 +28,6 @@ data ServerConfig = ServerConfig
   , db :: DatabaseConfig -- ^ database connection params
   } deriving (Show, Eq, GHC.Generic)
 
-serverCfg :: ServerConfig
-serverCfg = ServerConfig {port = 8083, db = defaultDatabaseConfig}
-
 readServerConfig :: FilePath -> IO ServerConfig
 readServerConfig fname = do
   contents <- BS.readFile fname
@@ -44,13 +41,13 @@ instance ToJSON ServerConfig
 startServer :: String -> IO ()
 startServer cfgFileName = do
   cfg <- readServerConfig cfgFileName
-  run (port cfg) app
+  run (port cfg) (app cfg)
 
-app :: Application
-app = serve api server
+app :: ServerConfig -> Application
+app cfg = serve api (server cfg)
 
-server :: Server API
-server = enter monadNatTransform server'
+server :: ServerConfig -> Server API
+server cfg = enter monadNatTransform server'
   where 
     server' :: ServerT API (ReaderT ServerConfig IO)
     server' = getFiles :<|> updateFilesList
@@ -73,5 +70,5 @@ server = enter monadNatTransform server'
 
     monadNatTransform :: ReaderT ServerConfig IO :~> EitherT ServantErr IO
     monadNatTransform = Nat $ \r -> do
-          t <- liftIO $ runReaderT r serverCfg
+          t <- liftIO $ runReaderT r cfg
           return t
