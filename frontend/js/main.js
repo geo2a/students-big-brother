@@ -12,57 +12,61 @@ $(document).ready(function() {
                     .uniq()
                     .sortBy()
                     .value();
-
-                var groupedFiles = _.chain(sourceFiles)
-                    .groupBy(function(x) {return x.uid;})
-                    .value();
-
-                // build students list on the ui
-                var studentTabs = document.getElementById("tabs");
-                var studentTabsContents = document.getElementById("tabs-contents");
-
-                _.forEach(uids, function(uid) {
-                    // students tabs list
-                    var studentTab = document.createElement("li");
-                    var a = document.createElement('a');
-                    a.href =  "#tab-" + uid;  
-                    a.innerHTML = "Student " + uid; 
-                    studentTab.appendChild(a);
-                    studentTabs.appendChild(studentTab);
-
-                    // students tabs contents
-                    var tabContent = document.createElement("div");
-                    tabContent.id = "tab-" + uid;
-                    tabContent.className = "tab-content";
-                    var filesOfThisUser = _.chain(groupedFiles[uid])
-                        .map(function (x) {
-                            return x.file;})
-                        .map(sourceFileJSONtoDOM)
-                        .map(function(fileNode) {
-                            var li = document.createElement("li");
-                            li.appendChild(fileNode);
-                            return li;
-                        })
+                
+                if (uids.length == 0) {
+                    $("#no-students-warning").show();
+                } else {
+                    var groupedFiles = _.chain(sourceFiles)
+                        .groupBy(function(x) {return x.uid;})
                         .value();
-                    var ul = document.createElement("ul");
-                    _.forEach(filesOfThisUser, function(li) {
-                        ul.appendChild(li);
-                    });
-                    tabContent.appendChild(
-                        ul
-                    );
-                    studentTabsContents.appendChild(tabContent);
-                });
 
-                $(".tabs-menu a").click(function(event) {
-                    $(".tab").css("display", "block");
-                    event.preventDefault();
-                    $(this).parent().addClass("current");
-                    $(this).parent().siblings().removeClass("current");
-                    var tab = $(this).attr("href");
-                    $(".tab-content").not(tab).css("display", "none");
-                    $(tab).fadeIn();
-                });
+                    // build students list on the ui
+                    var studentTabs = document.getElementById("tabs");
+                    var studentTabsContents = document.getElementById("tabs-contents");
+
+                    _.forEach(uids, function(uid) {
+                        // students tabs list
+                        var studentTab = document.createElement("li");
+                        var a = document.createElement('a');
+                        a.href =  "#tab-" + uid;  
+                        a.innerHTML = "Student " + uid; 
+                        studentTab.appendChild(a);
+                        studentTabs.appendChild(studentTab);
+
+                        // students tabs contents
+                        var tabContent = document.createElement("div");
+                        tabContent.id = "tab-" + uid;
+                        tabContent.className = "tab-content";
+                        var filesOfThisUser = _.chain(groupedFiles[uid])
+                            .map(function (x) {
+                                return x.file;})
+                            .map(sourceFileJSONtoDOM)
+                            .map(function(fileNode) {
+                                var li = document.createElement("li");
+                                li.appendChild(fileNode);
+                                return li;
+                            })
+                            .value();
+                        var ul = document.createElement("ul");
+                        _.forEach(filesOfThisUser, function(li) {
+                            ul.appendChild(li);
+                        });
+                        tabContent.appendChild(
+                            ul
+                        );
+                        studentTabsContents.appendChild(tabContent);
+                    });
+
+                    $(".tabs-menu a").click(function(event) {
+                        $(".tab").css("display", "block");
+                        event.preventDefault();
+                        $(this).parent().addClass("current");
+                        $(this).parent().siblings().removeClass("current");
+                        var tab = $(this).attr("href");
+                        $(".tab-content").not(tab).css("display", "none");
+                        $(tab).fadeIn();
+                    });
+                }
             }
     }
     );

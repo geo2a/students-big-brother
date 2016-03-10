@@ -54,7 +54,7 @@ body {
 }
 
 .tab-content {
-    width: 660px;
+    width: 800px;
     padding: 20px;
     display: none;
 }
@@ -64,6 +64,19 @@ body {
     border-bottom: thin solid #888888;
 }
 
-#tab-1 {
+.warning {
+    text-align: center;
+    background-color: #fff;
+    color: #2e7da3;
+    text-transform: uppercase;
+    border: thin solid #888888;
+    width: 500px;
+    padding: 5px;
+    margin: auto;
+    display: none;
+}
+
+/*#tab-1 {
  display: block;   
 }
+*/

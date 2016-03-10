@@ -17,3 +17,6 @@ cabal.sandbox.config
 
 # user files
 aux/
+
+# misc
+screenshots/
