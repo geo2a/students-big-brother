@@ -1,6 +1,18 @@
 $(document).ready(function() {
     // Ask server for array of students data
-    $.ajax({url: "http://127.0.0.1:8083/files", 
+    $.ajax({
+        url: "http://127.0.0.1:8083/files",
+        error: 
+            function(jqXHR, textStatus, errorThrown) {
+                switch(jqXHR.status) {
+                    case 500:
+                        $("#500-warning").show();
+                        break;
+                    default:
+                        $("#unknown-error-warning").show();
+                        console.log(jqXHR);
+                }
+            },
         success: 
             function(result) {
                 var sourceFiles = result;
