@@ -17,16 +17,15 @@ executable students-big-brother-exe
   hs-source-dirs:      src, app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base >= 4.7 && < 5
+  build-depends:       base
                      , either
                      , transformers
                      , text
                      , bytestring
                      , aeson
-                     , servant-server
-                     , servant-client
-                     , servant-lucid
-                     , lucid
+                     , servant-server >= 0.6
+                     , servant-client >= 0.6
+                     , http-client
                      , wai
                      , warp
                      , extensible-effects
@@ -40,7 +39,7 @@ executable students-big-brother-exe
                      , Client
                      , DB
                      , Server
-                     , Types 
+                     , Types
 
 test-suite students-big-brother-test
   type:                exitcode-stdio-1.0

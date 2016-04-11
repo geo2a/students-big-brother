@@ -4,7 +4,6 @@
 module API where
 
 import Servant
-import Servant.HTML.Lucid (HTML)
 
 import Types
 

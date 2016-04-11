@@ -8,7 +8,7 @@
 module Server where
 
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Either
+import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Control.Monad.Trans.Reader
 import qualified GHC.Generics as GHC
 import qualified Data.Text as Text
@@ -68,7 +68,7 @@ server cfg = enter monadNatTransform server'
           liftIO $ updateClientFiles dbConnection uid files 
           liftIO $ dbDisconnect dbConnection
 
-    monadNatTransform :: ReaderT ServerConfig IO :~> EitherT ServantErr IO
+    monadNatTransform :: ReaderT ServerConfig IO :~> ExceptT ServantErr IO
     monadNatTransform = Nat $ \r -> do
           t <- liftIO $ runReaderT r cfg
           return t

@@ -13,7 +13,7 @@ module Client where
 
 import Control.Applicative
 import Control.Monad
-import Control.Monad.Trans.Either
+import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Control.Eff hiding ((:>))
 import Control.Eff.Lift
 import Control.Eff.Reader.Lazy
@@ -33,6 +33,8 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as Text.IO
 import Servant
 import Servant.Client
+import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
+import System.IO.Unsafe (unsafePerformIO)
 
 import API
 import Types 
@@ -69,7 +71,8 @@ type DemandedEffects r =
 ------------------------------------------------------------
 
 -- | Consult Server module (Server.hs) for API documentation
-getFiles :<|> updateFilesList = client api (BaseUrl Http "localhost" 8083)
+getFiles :<|> updateFilesList = client api
+--getFiles :<|> updateFilesList = client api (BaseUrl Http "localhost" 8083) manager
 
 --------------------------------
 ---- Parsing Configurations ----
@@ -85,6 +88,9 @@ readClientConfig fname = do
 ------------------------
 ---- Business Logic ----
 ------------------------
+
+manager :: Manager
+manager = unsafePerformIO $ newManager defaultManagerSettings
 
 -- | Main loop
 loop :: DemandedEffects r => Eff r ()
@@ -102,7 +108,8 @@ loop = do
       filesContents <- lift $ mapM Text.IO.readFile currentFilesList
       let newState = zipWith SourceFile currentFilesList filesContents 
       put (zip newState modificationTimes)
-      lift $ runEitherT $ updateFilesList (userID cfg) newState -- send files to server
+      lift $ runExceptT $ 
+        updateFilesList (userID cfg) newState manager (BaseUrl Http "localhost" 8083 "")  -- send files to server
       return ()
   lift $ threadDelay $ refreshRate cfg 
   loop
@@ -110,9 +117,9 @@ loop = do
       symmetricDiff :: Eq a => [a] -> [a] -> [a]
       symmetricDiff xs ys = (xs `union` ys) \\ (xs `intersect` ys)
 
---------------------------
----- Sevice functions ----
---------------------------
+----------------------------
+------ Sevice functions ----
+----------------------------
 
 -- | Handles all effects produced by application. 
 runApp action cfg initState = 

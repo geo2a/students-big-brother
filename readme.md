@@ -45,15 +45,7 @@ $ psql -U students_big_brother -d students_big_brother_db -a -f db_init.sql
 
 You are supposed to have haskell [stack](http://docs.haskellstack.org/en/stable/README.html) installed 
 
-First of all you should start docker container with the database
-
-TODO: more info about docker container, e.g. pulling the image, etc.
-
-```
-docker start postgres-students-big-brother
-```
-
-Then you should run the server: 
+Run the server: 
 
 ```
 stack exec students-big-brother-exe -- --server <path_to_server_configuration>
