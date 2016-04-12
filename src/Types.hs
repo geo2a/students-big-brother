@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric, 
+             DeriveFunctor,
              FlexibleInstances,
              OverloadedStrings #-}
 
@@ -7,6 +8,8 @@ module Types where
 import Data.Aeson (FromJSON, ToJSON, toJSON)
 import Data.Text (Text, pack)
 import qualified GHC.Generics as GHC (Generic)
+import Data.Typeable (Typeable)
+import Servant.API.BasicAuth (BasicAuthData (BasicAuthData))
 
 type UserID = Int
 
@@ -45,6 +48,25 @@ data OwnedSourceFile = OwnedSourceFile { uid :: UserID
 
 instance FromJSON OwnedSourceFile
 instance ToJSON OwnedSourceFile
+
+-- | A user we'll grab from the database when we authenticate someone
+newtype Teacher = Teacher { teacherName :: Text }
+  deriving (Eq, Show)
+
+---- | The result of authentication/authorization
+--data BasicAuthResult usr
+--  = Unauthorized
+--  | BadPassword
+--  | NoSuchUser
+--  | Authorized usr
+--  deriving (Eq, Show, Read, GHC.Generic, Typeable, Functor)
+
+---- | Datatype wrapping a function used to check authentication.
+--newtype BasicAuthCheck usr = BasicAuthCheck
+--  { unBasicAuthCheck :: BasicAuthData
+--                     -> IO (BasicAuthResult usr)
+--  }
+--  deriving (GHC.Generic, Typeable, Functor)
 
 ---- HTML serialization of a single source code file
 --instance ToHtml OwnedSourceFile where

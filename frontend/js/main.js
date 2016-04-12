@@ -1,16 +1,28 @@
 $(document).ready(function() {
     // Ask server for array of students data
-    $.ajax({
+    $.ajax({ 
+        type: "GET",
         url: "http://127.0.0.1:8083/files",
+        beforeSend: 
+            function (xhr) {
+                xhr.setRequestHeader(
+                    'Authorization', 
+                    "Basic " + btoa("servant" + ":" + "server")
+                );
+            },
         error: 
             function(jqXHR, textStatus, errorThrown) {
                 switch(jqXHR.status) {
                     case 500:
                         $("#500-warning").show();
                         break;
+                    case 401: 
+                        $("#401-warning").show();
+                        break;
                     default:
+                        console.log(textStatus + "," + errorThrown + "," + jqXHR.responseText);
+                        console.log(arguments);
                         $("#unknown-error-warning").show();
-                        console.log(jqXHR);
                 }
             },
         success: 

@@ -4,11 +4,12 @@
 module API where
 
 import Servant
+import Servant.API.ResponseHeaders
 
 import Types
 
 type TeachersAPI = 
-  "files" :> Get '[JSON] [OwnedSourceFile]
+  "files" :> BasicAuth "foo-realm" Teacher :> Get '[JSON] [OwnedSourceFile]
 
 type StudentsDaemonAPI = "files" :> 
   Capture "userid" UserID :> ReqBody '[JSON] [SourceFile] :> Post '[JSON] () 

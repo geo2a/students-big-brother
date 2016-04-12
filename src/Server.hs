@@ -1,4 +1,5 @@
-{-# LANGUAGE TypeOperators   
+{-# LANGUAGE TypeOperators
+           , DataKinds   
            , DeriveGeneric   
            , OverloadedStrings
            , FlexibleContexts
@@ -15,7 +16,8 @@ import qualified Data.Text as Text
 import qualified Data.ByteString.Lazy as BS
 import Data.Aeson
 import Network.Wai.Handler.Warp
-import Network.Wai 
+import Network.Wai
+import Network.Wai.Middleware.Cors
 import Servant
 
 import API
@@ -44,7 +46,7 @@ startServer cfgFileName = do
   run (port cfg) (app cfg)
 
 app :: ServerConfig -> Application
-app cfg = serve api (server cfg)
+app cfg = simpleCors $ serveWithContext api basicAuthServerContext (server cfg)
 
 server :: ServerConfig -> Server API
 server cfg = enter monadNatTransform server'
@@ -52,8 +54,8 @@ server cfg = enter monadNatTransform server'
     server' :: ServerT API (ReaderT ServerConfig IO)
     server' = getFiles :<|> updateFilesList
       where
-        getFiles :: ReaderT ServerConfig IO [OwnedSourceFile]
-        getFiles = do
+        getFiles :: Teacher -> ReaderT ServerConfig IO [OwnedSourceFile]
+        getFiles teacher = do
           cfg <- ask 
           dbConnection <- liftIO $ dbConnect $ db cfg
           rows <- liftIO $ selectAllFiles dbConnection
@@ -72,3 +74,19 @@ server cfg = enter monadNatTransform server'
     monadNatTransform = Nat $ \r -> do
           t <- liftIO $ runReaderT r cfg
           return t
+
+-- | 'BasicAuthCheck' holds the handler we'll use to verify a username and password.
+authCheck :: BasicAuthCheck Teacher
+authCheck =
+  let check (BasicAuthData username password) =
+        if username == "servant" && password == "server"
+        then return (Authorized (Teacher "servant"))
+        else return Unauthorized
+  in BasicAuthCheck check
+
+-- | We need to supply our handlers with the right Context. In this case,
+-- Basic Authentication requires a Context Entry with the 'BasicAuthCheck' value
+-- tagged with "foo-tag" This context is then supplied to 'server' and threaded 
+-- to the BasicAuth HasServer handlers.
+basicAuthServerContext :: Context (BasicAuthCheck Teacher ': '[])
+basicAuthServerContext = authCheck :. EmptyContext

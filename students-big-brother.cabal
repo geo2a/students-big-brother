@@ -23,10 +23,12 @@ executable students-big-brother-exe
                      , text
                      , bytestring
                      , aeson
-                     , servant-server >= 0.6
-                     , servant-client >= 0.6
+                     , servant >= 0.6.1
+                     , servant-server >= 0.6.1
+                     , servant-client >= 0.6.1
                      , http-client
                      , wai
+                     , wai-cors
                      , warp
                      , extensible-effects
                      , process
