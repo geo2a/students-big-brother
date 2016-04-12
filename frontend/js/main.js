@@ -7,21 +7,18 @@ $(document).ready(function() {
         $.ajax({ 
             type: "GET",
             url: "http://127.0.0.1:8083/files",
-            beforeSend: 
-                function (xhr) {
-                    xhr.setRequestHeader(
-                        'Authorization', 
-                        "Basic " + btoa(username + ":" + password)
-                    );
-                },
+            dataType: 'json',
+            headers: {
+                "Authorization": "Basic " + btoa(username + ":" + password)
+              },
             error: 
                 function(jqXHR, textStatus, errorThrown) {
                     switch(jqXHR.status) {
                         case 500:
                             $("#500-warning").show();
                             break;
-                        case 401: 
-                            $("#401-warning").show();
+                        case 401, 403: 
+                            $("#401-403-warning").show();
                             break;
                         default:
                             console.log(textStatus + "," + 
@@ -31,8 +28,11 @@ $(document).ready(function() {
                             $("#unknown-error-warning").show();
                     }
                 },
-            success: 
+            success:
                 function(result) {
+                    // hide warnings if presented 
+                    $(".warning-container").hide();
+
                     // hide login form
                     $("#login-form").hide();
 

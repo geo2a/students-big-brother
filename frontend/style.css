@@ -2,7 +2,7 @@ body {
     background-image: url("resources/background.jpg");
     width: 800px;
     margin: auto;
-    padding: 20px;
+    padding: 0px;
     font-family: Arial, Helvetica, sans-serif;
     line-height: 1.5;
     font-size: 14px;        
@@ -64,19 +64,45 @@ body {
     border-bottom: thin solid #888888;
 }
 
+.warning-container {
+    padding: 0px;
+    margin: 0px;
+    margin-top: 10px;
+    border: none;
+}
+
 .warning {
+    margin: 0px;
+    /*padding: 5px;*/
+    border: thin solid #888888;
+    /*margin: auto;*/
     text-align: center;
     background-color: #fff;
     color: #2e7da3;
     text-transform: uppercase;
-    border: thin solid #888888;
-    width: 500px;
-    padding: 5px;
-    margin: auto;
+    /*width: 500px;*/
     display: none;
 }
 
-/*#tab-1 {
- display: block;   
+.login-form-container {
+    border: none;
+    /*display: block;*/
 }
-*/
+
+.login-form-container * {
+    /*margin: auto;*/
+    width: 200px;
+    /*margin-bottom: 10px;*/
+    display: block;
+}
+
+.login-form-container input {
+    width:100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    height: 35px;
+}
+
+.login-form-container button {
+    height: 50px;
+}

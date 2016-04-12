@@ -26,40 +26,43 @@
 </head>
 <body>
 
+<div class="login-form-container"  id="login-form">
+  <form>
+    <input placeholder="username" 
+           type="text" name="username" id="login-username">
+    <input placeholder="password"
+           type="password" name="password" id="login-password">
+    <button id = "login-button" type="button">Log In</button>
+  </form>
+</div>
+
+<div class="warning-container">
+  <div class="warning" id="no-students-warning">
+    <h1> No students connected </h1>
+  </div>
+
+  <div class="warning" id="500-warning">
+    <h1> Internal server error. </h1>
+    <p> I think you should check db. </p>
+  </div>
+
+  <div class="warning" id="401-403-warning">
+    <h1> Authentication error. </h1>
+    <p> Please check username/password and try again. </p>
+  </div>
+
+  <div class="warning" id="unknown-error-warning">
+    <h1> Something went wrong. </h1>
+    <p>I think you should check main/frontend server. </p>
+  </div>
+</div>
+
 <div id="tabs-container">
-    <div id = "login-form">
-    <form>
-      Username:<br>
-      <input type="text" id = "login-username"><br>
-      Password:<br>
-      <input type="password" id = "login-password"><br><br>
-      <button id = "login-button" type="button">Log In</button>
-    </form>
-    </div>
-
-    <div class="warning" id="no-students-warning">
-      <h1> No students connected </h1>
-    </div>
-    
-    <div class="warning" id="500-warning">
-      <h1> Internal server error. </h1>
-      <p> I think you should check db. </p>
-    </div>
-
-    <div class="warning" id="401-warning">
-      <h1> Authentication error. </h1>
-    </div>
-
-    <div class="warning" id="unknown-error-warning">
-      <h1> Something went wrong. </h1>
-      <p>I think you should check main/frontend server. </p>
-    </div>
-
-    <ul class="tabs-menu" id="tabs">
-    </ul>
-    
-    <div class="tab" id="tabs-contents">
-    </div>
+  <ul class="tabs-menu" id="tabs">
+  </ul>
+  
+  <div class="tab" id="tabs-contents">
+  </div>
 </div>
 
 </body>
