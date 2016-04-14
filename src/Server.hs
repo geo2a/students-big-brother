@@ -79,7 +79,7 @@ server cfg = enter monadNatTransform server'
 authCheck :: BasicAuthCheck Teacher
 authCheck =
   let check (BasicAuthData username password) =
-        if username == "servant" && password == "server"
+        if username == "teacher" && password == "teacher"
         then return (Authorized (Teacher "servant"))
         else return Unauthorized
   in BasicAuthCheck check

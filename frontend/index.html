@@ -26,7 +26,11 @@
 </head>
 <body>
 
-<div class="login-form-container"  id="login-form">
+<header class="container">
+  Students Big Brother
+</header>
+
+<div class="container login-form-container"  id="login-form">
   <form>
     <input placeholder="username" 
            type="text" name="username" id="login-username">
@@ -37,33 +41,37 @@
 </div>
 
 <div class="warning-container">
-  <div class="warning" id="no-students-warning">
+  <div class="container warning" id="no-students-warning">
     <h1> No students connected </h1>
   </div>
 
-  <div class="warning" id="500-warning">
+  <div class="container warning" id="500-warning">
     <h1> Internal server error. </h1>
     <p> I think you should check db. </p>
   </div>
 
-  <div class="warning" id="401-403-warning">
+  <div class="container warning" id="401-403-warning">
     <h1> Authentication error. </h1>
     <p> Please check username/password and try again. </p>
   </div>
 
-  <div class="warning" id="unknown-error-warning">
+  <div class="container warning" id="unknown-error-warning">
     <h1> Something went wrong. </h1>
     <p>I think you should check main/frontend server. </p>
   </div>
 </div>
 
-<div id="tabs-container">
+<div id="container tabs-container">
   <ul class="tabs-menu" id="tabs">
   </ul>
   
   <div class="tab" id="tabs-contents">
   </div>
 </div>
+
+<footer class="container">
+  (ↄ) Georgy Lukyanov, 2016, v0.0.0.1
+</footer>
 
 </body>
 </html>
