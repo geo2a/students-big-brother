@@ -52,18 +52,29 @@ server :: ServerConfig -> Server API
 server cfg = enter monadNatTransform server'
   where 
     server' :: ServerT API (ReaderT ServerConfig IO)
-    server' = getFiles :<|> updateFilesList
+    server' = getFiles :<|> registerStudent :<|> updateFilesList
       where
+        -- | Obtain all files of all students
         getFiles :: Teacher -> ReaderT ServerConfig IO [OwnedSourceFile]
         getFiles teacher = do
           cfg <- ask 
           dbConnection <- liftIO $ dbConnect $ db cfg
           rows <- liftIO $ selectAllFiles dbConnection
+          liftIO $ print rows
           liftIO $ dbDisconnect dbConnection
           return rows
         
+        registerStudent :: Text.Text -> 
+                      Text.Text -> ReaderT ServerConfig IO StudentId
+        registerStudent = 
+          undefined
+          --do
+          --dbConnection <- liftIO $ dbConnect $ db cfg
+          --let newStudent = 
+
         -- | Substitute existing files list with given 
-        updateFilesList :: UserID -> [SourceFile] -> ReaderT ServerConfig IO ()
+        updateFilesList :: StudentId -> 
+                           [SourceFile] -> ReaderT ServerConfig IO ()
         updateFilesList uid files = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg

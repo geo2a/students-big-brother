@@ -4,7 +4,7 @@
 
 -- Please, see readme.md for more complete and up-to-date info
 
--- First two lines have to be executed under postgresql user 
+-- Next two lines have to be executed under postgresql user 
 
 -- CREATE USER students_big_brother WITH SUPERUSER PASSWORD '123';
 
@@ -13,15 +13,40 @@
 -- After that you can execute this script to initialize table like this: 
 -- psql -U students_big_brother -d students_big_brother_db -a -f db_init.sql
 
-CREATE TABLE files ( id serial CONSTRAINT firstkey PRIMARY KEY
-                   , clientID integer NOT NULL
-                   , filePath varchar(32) NOT NULL
-                   , fileContents varchar(4096)
+CREATE TABLE students ( student_id serial PRIMARY KEY
+                      , first_name varchar(32)
+                      , last_name  varchar(32)
+                      );
+
+CREATE TABLE files ( file_id serial PRIMARY KEY
+                   , file_path varchar(32) NOT NULL
+                   , file_contents varchar(4096)
+                   , student_id integer NOT NULL
                    );
 
-GRANT USAGE, SELECT ON SEQUENCE files_id_seq TO students_big_brother_db;
+CREATE TABLE teachers ( teacher_id integer PRIMARY KEY
+                      , first_name varchar(32) NOT NULL
+                      , last_name varchar(32) NOT NULL
+                      , password varchar(32) NOT NULL -- security? Ha-Ha. 
+                      ); 
 
-ALTER SEQUENCE files_id_seq RESTART WITH 1;
+GRANT USAGE, SELECT ON SEQUENCE files_file_id_seq TO students_big_brother;
+GRANT USAGE, SELECT ON SEQUENCE students_student_id_seq TO students_big_brother;
+ALTER SEQUENCE files_file_id_seq RESTART WITH 1;
+ALTER SEQUENCE students_student_id_seq RESTART WITH 1;
 
--- insert into files(clientID, filePath, fileContents) values (1, 'main.hs', 
---                                                             'lalalalalala');
+--------------------------------
+-- Some test data and queries --
+--------------------------------
+
+-- Insert new student
+INSERT INTO students (student_id, first_name, last_name) VALUES
+                     (1, 'John', 'Lennon')
+       RETURNING student_id;
+
+-- Insert new file
+-- INSERT INTO files (file_id, file_path, file_contents, student_id) VALUES
+--                      (DEFAULT, 'song1', 'Let it be', 1);
+
+-- SELECT students.student_id, file_id, file_path, file_contents FROM 
+--   students INNER JOIN files ON students.student_id = files.student_id;

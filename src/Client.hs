@@ -48,7 +48,9 @@ type RefreshInterval = Int
 type ModificationTime = UTCTime
 
 data ClientConfig = ClientConfig 
-  { userID            :: UserID
+  { student_id        :: StudentId
+  , first_name        :: Text.Text
+  , last_name         :: Text.Text
   , directory         :: FilePath -- ^ path directory to watch 
   , refreshRate       :: RefreshInterval -- ^ refresh rate in seconds 
   , ignore            :: [FilePath] -- ^ list of ignored files
@@ -71,7 +73,7 @@ type DemandedEffects r =
 ------------------------------------------------------------
 
 -- | Consult Server module (Server.hs) for API documentation
-getFiles :<|> updateFilesList = client api
+getFiles :<|> registerStudent :<|> updateFilesList = client api
 --getFiles :<|> updateFilesList = client api (BaseUrl Http "localhost" 8083) manager
 
 --------------------------------
@@ -98,7 +100,8 @@ loop = do
   cfg <- ask
   (state :: ClientState) <- get  
   
-  currentFilesList <- (\\ ignore cfg) <$> (lift $ getDirectoryContents $ directory cfg) 
+  currentFilesList <- (\\ ignore cfg) <$> 
+    (lift $ getDirectoryContents $ directory cfg) 
   modificationTimes <- lift $ mapM getModificationTime currentFilesList
   let timedCurrentFilesList = zip currentFilesList modificationTimes 
   let timedPreviousFilesList = map (\(f, t) -> (path f, t)) state
@@ -109,7 +112,8 @@ loop = do
       let newState = zipWith SourceFile currentFilesList filesContents 
       put (zip newState modificationTimes)
       lift $ runExceptT $ 
-        updateFilesList (userID cfg) newState manager (BaseUrl Http "localhost" 8083 "")  -- send files to server
+        updateFilesList (student_id cfg) newState manager 
+          (BaseUrl Http "localhost" 8083 "")  -- send files to server
       return ()
   lift $ threadDelay $ refreshRate cfg 
   loop
