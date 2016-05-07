@@ -3,7 +3,8 @@
            , TemplateHaskell
            , QuasiQuotes
            , DeriveGeneric
-           , StandaloneDeriving#-}
+           , StandaloneDeriving
+           , ScopedTypeVariables #-}
 
 module DB where
 
@@ -29,41 +30,41 @@ instance FromJSON ConnectInfo
 
 type DatabaseConfig = ConnectInfo
 
+type ClientID = Int
+
 dbConnect :: DatabaseConfig -> IO Connection
 dbConnect = connect
 
 dbDisconnect :: Connection -> IO ()
 dbDisconnect = close
 
-selectAllFiles :: Connection -> IO [OwnedSourceFile]
-selectAllFiles conn = do
-  rows <- query_ conn [sql|
-    SELECT student_id, file_id, file_path, file_contents FROM files;
-  |] :: IO [(StudentId, FileId, FilePath, Text.Text)]
+dbSelectAllFiles :: Connection -> IO [OwnedSourceFile]
+dbSelectAllFiles conn = do
+  rows <- query_ conn [sql| select * from files |] ::
+              IO [(Integer, ClientID, FilePath, Text.Text)]
   return $ map readRow rows
     where
       readRow (_, cid, path, contents) =
         OwnedSourceFile cid (SourceFile path contents)
 
-insertFile :: Connection -> StudentId -> SourceFile -> IO ()
-insertFile conn student_id (SourceFile path contents) =
+dbInsertFile :: Connection -> ClientID -> SourceFile -> IO ()
+dbInsertFile conn clientID (SourceFile path contents) =
   execute conn [sql|
-    INSERT INTO files (file_id, file_path, file_contents, student_id) VALUES
-                      (DEFAULT, ?, ?, ?)
-  |] (path, contents, student_id) >> return ()
+    INSERT INTO files(clientID, filePath, fileContents) VALUES
+      (?, ?, ?)
+  |] (clientID, path, contents) >> return ()
 
--- | Update list of files for a specific student
--- TODO: Needs refactoring, now it just deletes all students files from db and puts new ones, this is unacceptable
-updateFiles :: Connection -> StudentId -> [SourceFile] -> IO ()
-updateFiles conn student_id files = do
+dbUpdateFiles :: Connection -> ClientID -> [SourceFile] -> IO ()
+dbUpdateFiles conn clientID files = do
   execute conn [sql|
-    DELETE FROM files WHERE student_id = ?
-  |] (Only student_id)
-  mapM_ (insertFile conn student_id) files
+    DELETE FROM files WHERE clientid = ?
+  |] (Only clientID)
+  mapM_ (dbInsertFile conn clientID) files
 
--- | Delete all files of all students, use with care
-cleanUp :: Connection -> IO ()
-cleanUp conn =
-  execute_ conn [sql|
-    DELETE FROM files
-  |] >> return ()
+dbAddTeacher :: Connection -> Credential -> IO Int
+dbAddTeacher conn (Credential (FullName fn ln) pwd) = do
+  teacher_id :: [Only Int] <- query conn [sql|
+    INSERT INTO teachers (teacher_id, first_name, last_name, password)
+      VALUES (DEFAULT,?,?,?) RETURNING teacher_id
+  |] (fn, ln, pwd)
+  return . fromOnly . head $ teacher_id

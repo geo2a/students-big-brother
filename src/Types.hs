@@ -22,6 +22,15 @@ data FullName = FullName { firstName :: Text
 instance FromJSON FullName
 instance ToJSON FullName
 
+type Password = Text
+
+data Credential = Credential { name :: FullName
+                             , password :: Password
+                             } deriving (Eq, Show, GHC.Generic)
+
+instance FromJSON Credential
+instance ToJSON Credential
+
 -- | Text file with source code
 data SourceFile = SourceFile { path :: FilePath
                              , contents :: Text
@@ -39,5 +48,10 @@ instance FromJSON OwnedSourceFile
 instance ToJSON OwnedSourceFile
 
 -- | A user we'll grab from the database when we authenticate someone
-newtype Teacher = Teacher { teacherName :: Text }
-  deriving (Eq, Show)
+data Teacher = Teacher { teacher_id :: Int
+                       , teacher_credential :: Credential
+                       }
+  deriving (Eq, Show, GHC.Generic)
+
+instance FromJSON Teacher
+instance ToJSON Teacher

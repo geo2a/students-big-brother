@@ -15,6 +15,7 @@ import qualified GHC.Generics as GHC
 import qualified Data.Text as Text
 import qualified Data.ByteString.Lazy as BS
 import Data.Aeson
+import Data.Text.Encoding (decodeUtf8)
 import Network.Wai.Handler.Warp
 import Network.Wai
 import Network.Wai.Middleware.Cors
@@ -52,25 +53,32 @@ server :: ServerConfig -> Server API
 server cfg = enter monadNatTransform server'
   where
     server' :: ServerT API (ReaderT ServerConfig IO)
-    server' = getFiles :<|> updateFilesList
+    server' = getFiles :<|> updateFiles :<|> registerTeacher
       where
         -- | Obtain all files of all students
         getFiles :: Teacher -> ReaderT ServerConfig IO [OwnedSourceFile]
         getFiles teacher = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
-          rows <- liftIO $ selectAllFiles dbConnection
+          rows <- liftIO $ dbSelectAllFiles dbConnection
           liftIO $ dbDisconnect dbConnection
           return rows
 
         -- | Substitute existing files list with given
-        updateFilesList :: StudentId ->
+        updateFiles :: StudentId ->
                            [SourceFile] -> ReaderT ServerConfig IO ()
-        updateFilesList uid files = do
+        updateFiles uid files = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
-          liftIO $ updateFiles dbConnection uid files
+          liftIO $ dbUpdateFiles dbConnection uid files
           liftIO $ dbDisconnect dbConnection
+
+        registerTeacher :: Credential -> ReaderT ServerConfig IO Teacher
+        registerTeacher crd = do
+          dbConnection <- liftIO $ dbConnect $ db cfg
+          teacherId <- liftIO $ dbAddTeacher dbConnection crd
+          liftIO $ dbDisconnect dbConnection
+          return $ Teacher teacherId crd
 
     monadNatTransform :: ReaderT ServerConfig IO :~> ExceptT ServantErr IO
     monadNatTransform = Nat $ \r -> do
@@ -82,7 +90,10 @@ authCheck :: BasicAuthCheck Teacher
 authCheck =
   let check (BasicAuthData username password) =
         if username == "teacher" && password == "teacher"
-        then return (Authorized (Teacher "servant"))
+        then return (Authorized (Teacher 0
+                                (Credential (FullName (decodeUtf8 username)
+                                                      (decodeUtf8 username))
+                                                        (decodeUtf8 password))))
         else return Unauthorized
   in BasicAuthCheck check
 

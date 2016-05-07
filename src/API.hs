@@ -17,10 +17,15 @@ type StudentsAPI =
           :> ReqBody '[JSON] [SourceFile]
           :> Post '[JSON] ()
 
+type AdminAPI =
+  "register-teacher" :> ReqBody '[JSON] Credential :> Post '[JSON] Teacher
+
 type API =
   TeachersAPI
   :<|>
   StudentsAPI
+  :<|>
+  AdminAPI
 
 api :: Proxy API
 api = Proxy

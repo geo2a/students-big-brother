@@ -73,8 +73,8 @@ type DemandedEffects r =
 ------------------------------------------------------------
 
 -- | Consult Server module (Server.hs) for API documentation
-getFiles :<|> updateFilesList = client api
---getFiles :<|> updateFilesList = client api (BaseUrl Http "localhost" 8083) manager
+-- | TODO: restrict client API, client daemon doesn't need to have access to non-student API
+getFiles :<|> updateFilesList :<|> registerTeacher = client api
 
 --------------------------------
 ---- Parsing Configurations ----

@@ -24,7 +24,7 @@ CREATE TABLE files ( file_id serial PRIMARY KEY
                    , student_id integer NOT NULL
                    );
 
-CREATE TABLE teachers ( teacher_id integer PRIMARY KEY
+CREATE TABLE teachers ( teacher_id serial PRIMARY KEY
                       , first_name varchar(32) NOT NULL
                       , last_name varchar(32) NOT NULL
                       , password varchar(32) NOT NULL -- security? Ha-Ha.
@@ -50,3 +50,7 @@ ALTER SEQUENCE students_student_id_seq RESTART WITH 1;
 
 -- SELECT students.student_id, file_id, file_path, file_contents FROM
 --   students INNER JOIN files ON students.student_id = files.student_id;
+
+-- Insert new teacher
+-- INSERT INTO teachers (teacher_id, first_name, last_name, password)
+--   VALUES (DEFAULT,'lal','lal','lal') RETURNING teacher_id;
