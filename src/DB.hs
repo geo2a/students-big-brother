@@ -75,3 +75,11 @@ dbLookupTeacher conn (Credential uname pwd) = do
     SELECT teacher_id FROM teachers WHERE username = ? AND password = ?
   |] (uname, pwd)
   return . not . null $ student_id
+
+dbListTeachers :: Connection -> IO [Teacher]
+dbListTeachers conn = do
+  teachers :: [(Int, Username, Password)] <- query_ conn [sql|
+    SELECT * FROM teachers
+  |]
+  return . map (uncurry Teacher)
+         . map (\(a,b,c) -> (a, Credential b c)) $ teachers
