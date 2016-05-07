@@ -21,5 +21,5 @@ curl -X POST -d "[{\"path\": \"file1.hs\", \"contents\": \"source code 1\"}, {\"
 * Register a new teacher
 
 ```
-curl -X POST -d "{\"username\": \"AlanTuring\", \"password\": \"123\"}" -H 'Accept: application/json' -H 'Content-type: application/json' localhost:8083/register-teacher
+curl -X POST -d "{\"username\": \"AlanTuring123\", \"password\": \"123\"}" -H 'Accept: application/json' -H 'Content-type: application/json' localhost:8083/admin/register-teacher
 ```

@@ -1,28 +1,28 @@
 $(document).ready(function() {
-    $("#login-button").on('click', function(e) { 
+    $("#login-button").on('click', function(e) {
         var username = $("#login-username").val();
         var password = $("#login-password").val();
-        
+
         // Authenticate teacher and ask server for array of students data
-        $.ajax({ 
+        $.ajax({
             type: "GET",
             url: "http://127.0.0.1:8083/files",
-            dataType: 'json',
+            dataType: "json",
             headers: {
                 "Authorization": "Basic " + btoa(username + ":" + password)
               },
-            error: 
+            error:
                 function(jqXHR, textStatus, errorThrown) {
                     switch(jqXHR.status) {
                         case 500:
                             $("#500-warning").show();
                             break;
-                        case 401, 403: 
+                        case 401, 403:
                             $("#401-403-warning").show();
                             break;
                         default:
-                            console.log(textStatus + "," + 
-                                        errorThrown + "," + 
+                            console.log(textStatus + "," +
+                                        errorThrown + "," +
                                         jqXHR.responseText);
                             console.log(arguments);
                             $("#unknown-error-warning").show();
@@ -30,7 +30,7 @@ $(document).ready(function() {
                 },
             success:
                 function(result) {
-                    // hide warnings if presented 
+                    // hide warnings if presented
                     $(".warning-container").hide();
 
                     // hide login form
@@ -45,7 +45,7 @@ $(document).ready(function() {
                         .uniq()
                         .sortBy()
                         .value();
-                    
+
                     if (uids.length == 0) {
                         $("#no-students-warning").show();
                     } else {
@@ -55,15 +55,15 @@ $(document).ready(function() {
 
                         // build students list on the ui
                         var studentTabs = document.getElementById("tabs");
-                        var studentTabsContents = 
+                        var studentTabsContents =
                             document.getElementById("tabs-contents");
 
                         _.forEach(uids, function(uid) {
                             // students tabs list
                             var studentTab = document.createElement("li");
                             var a = document.createElement('a');
-                            a.href =  "#tab-" + uid;  
-                            a.innerHTML = "Student " + uid; 
+                            a.href =  "#tab-" + uid;
+                            a.innerHTML = "Student " + uid;
                             studentTab.appendChild(a);
                             studentTabs.appendChild(studentTab);
 
@@ -119,11 +119,11 @@ function sourceFileJSONtoDOM(file) {
     result.appendChild(pre);
 
     hljs.configure({
-      languages: ["haskell", "cpp", "c", "h", "hpp", 
+      languages: ["haskell", "cpp", "c", "h", "hpp",
                   "pascal", "java", "csharp", "python",
                   "html", "css", "js"]
     });
     hljs.highlightBlock(pre);
-    
+
     return result;
-} 
+}
