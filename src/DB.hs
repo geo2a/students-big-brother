@@ -62,9 +62,16 @@ dbUpdateFiles conn clientID files = do
   mapM_ (dbInsertFile conn clientID) files
 
 dbAddTeacher :: Connection -> Credential -> IO Int
-dbAddTeacher conn (Credential (FullName fn ln) pwd) = do
+dbAddTeacher conn (Credential uname pwd) = do
   teacher_id :: [Only Int] <- query conn [sql|
-    INSERT INTO teachers (teacher_id, first_name, last_name, password)
-      VALUES (DEFAULT,?,?,?) RETURNING teacher_id
-  |] (fn, ln, pwd)
+    INSERT INTO teachers (teacher_id, username, password)
+      VALUES (DEFAULT,?,?) RETURNING teacher_id
+  |] (uname, pwd)
   return . fromOnly . head $ teacher_id
+
+dbLookupTeacher :: Connection -> Credential -> IO Bool
+dbLookupTeacher conn (Credential uname pwd) = do
+  student_id :: [Only Int] <- query conn [sql|
+    SELECT teacher_id FROM teachers WHERE username = ? AND password = ?
+  |] (uname, pwd)
+  return . not . null $ student_id

@@ -15,16 +15,18 @@ type StudentId = Int
 
 type FileId    = Int
 
-data FullName = FullName { firstName :: Text
-                         , lastName :: Text
-                         } deriving (Eq, Show, GHC.Generic)
+-- data FullName = FullName { firstName :: Text
+--                          , lastName :: Text
+--                          } deriving (Eq, Show, GHC.Generic)
 
-instance FromJSON FullName
-instance ToJSON FullName
+-- instance FromJSON FullName
+-- instance ToJSON FullName
 
 type Password = Text
 
-data Credential = Credential { name :: FullName
+type Username = Text
+
+data Credential = Credential { username :: Username
                              , password :: Password
                              } deriving (Eq, Show, GHC.Generic)
 

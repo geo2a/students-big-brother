@@ -47,7 +47,8 @@ startServer cfgFileName = do
   run (port cfg) (app cfg)
 
 app :: ServerConfig -> Application
-app cfg = simpleCors $ serveWithContext api basicAuthServerContext (server cfg)
+app cfg = simpleCors $ serveWithContext api (basicAuthServerContext cfg)
+                       (server cfg)
 
 server :: ServerConfig -> Server API
 server cfg = enter monadNatTransform server'
@@ -86,20 +87,27 @@ server cfg = enter monadNatTransform server'
           return t
 
 -- | 'BasicAuthCheck' holds the handler we'll use to verify a username and password.
-authCheck :: BasicAuthCheck Teacher
-authCheck =
-  let check (BasicAuthData username password) =
-        if username == "teacher" && password == "teacher"
-        then return (Authorized (Teacher 0
-                                (Credential (FullName (decodeUtf8 username)
-                                                      (decodeUtf8 username))
-                                                        (decodeUtf8 password))))
-        else return Unauthorized
-  in BasicAuthCheck check
+authCheck :: ServerConfig -> BasicAuthCheck Teacher
+authCheck cfg =
+  BasicAuthCheck check
+  where
+    check (BasicAuthData username password) = do
+          let username' = decodeUtf8 username
+              password' = decodeUtf8 password
+          dbConnection <- liftIO $ dbConnect $ db cfg
+          teacherIsPresent <- dbLookupTeacher dbConnection
+                                              (Credential username' password')
+          liftIO $ dbDisconnect dbConnection
+          if teacherIsPresent
+          then return (Authorized (Teacher 0
+                                  (Credential username'
+                                              password')))
+          else return Unauthorized
 
 -- | We need to supply our handlers with the right Context. In this case,
 -- Basic Authentication requires a Context Entry with the 'BasicAuthCheck' value
 -- tagged with "foo-tag" This context is then supplied to 'server' and threaded
 -- to the BasicAuth HasServer handlers.
-basicAuthServerContext :: Context (BasicAuthCheck Teacher ': '[])
-basicAuthServerContext = authCheck :. EmptyContext
+basicAuthServerContext :: ServerConfig ->
+                          Context (BasicAuthCheck Teacher ': '[])
+basicAuthServerContext cfg = authCheck cfg :. EmptyContext
