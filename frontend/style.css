@@ -13,7 +13,7 @@ body {
     padding: 0px;
     font-family: Arial, Helvetica, sans-serif;
     line-height: 1.5;
-    font-size: 14px;        
+    font-size: 14px;
 }
 
 .tabs-menu {
@@ -45,7 +45,7 @@ body {
     padding: 10px;
     text-transform: uppercase;
     color: #fff;
-    text-decoration: none; 
+    text-decoration: none;
 }
 
 .tabs-menu .current a {
@@ -128,4 +128,53 @@ footer {
     text-transform: uppercase;
     font-size: 12px;
     color: #2e7da3;
+}
+
+.teachers-list-container header {
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: bold;
+    color: #2e7da3;
+}
+
+table {
+    font-size: 16px;
+    width: 100%;
+    text-align: center;
+}
+th {
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 2px;
+}
+
+tr {
+  height: 20px;
+}
+
+td {
+  border: 1px solid rgba(46,125,163,0.2);
+  background-color: rgba(46,125,163,0.1);
+}
+
+.teacher-delete-button {
+    background-color: rgba(255,255,255,0.75);
+    border: 3px solid rgba(46,125,163,0.3);
+    color: #2e7da3;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+      width: 100%;
+}
+
+.add-teacher-button {
+  background-color: rgba(46,125,163, 0.6);
+  color: rgba(255,255,255,1);
+  width: 100%;
+  height: 45px;
+  display: block;
+  font-size: 30px;
+  /*text-transform: uppercase;*/
+  /*font-weight: bold;*/
 }
