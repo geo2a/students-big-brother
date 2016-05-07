@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeOperators
-           , DataKinds   
-           , DeriveGeneric   
+           , DataKinds
+           , DeriveGeneric
            , OverloadedStrings
            , FlexibleContexts
            , TemplateHaskell
@@ -24,8 +24,8 @@ import API
 import DB
 import Types
 
--- | Server configuration 
-data ServerConfig = ServerConfig 
+-- | Server configuration
+data ServerConfig = ServerConfig
   { port :: Int
   , db :: DatabaseConfig -- ^ database connection params
   } deriving (Show, Eq, GHC.Generic)
@@ -50,35 +50,26 @@ app cfg = simpleCors $ serveWithContext api basicAuthServerContext (server cfg)
 
 server :: ServerConfig -> Server API
 server cfg = enter monadNatTransform server'
-  where 
+  where
     server' :: ServerT API (ReaderT ServerConfig IO)
-    server' = getFiles :<|> registerStudent :<|> updateFilesList
+    server' = getFiles :<|> updateFilesList
       where
         -- | Obtain all files of all students
         getFiles :: Teacher -> ReaderT ServerConfig IO [OwnedSourceFile]
         getFiles teacher = do
-          cfg <- ask 
+          cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
           rows <- liftIO $ selectAllFiles dbConnection
-          liftIO $ print rows
           liftIO $ dbDisconnect dbConnection
           return rows
-        
-        registerStudent :: Text.Text -> 
-                      Text.Text -> ReaderT ServerConfig IO StudentId
-        registerStudent = 
-          undefined
-          --do
-          --dbConnection <- liftIO $ dbConnect $ db cfg
-          --let newStudent = 
 
-        -- | Substitute existing files list with given 
-        updateFilesList :: StudentId -> 
+        -- | Substitute existing files list with given
+        updateFilesList :: StudentId ->
                            [SourceFile] -> ReaderT ServerConfig IO ()
         updateFilesList uid files = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
-          liftIO $ updateClientFiles dbConnection uid files 
+          liftIO $ updateFiles dbConnection uid files
           liftIO $ dbDisconnect dbConnection
 
     monadNatTransform :: ReaderT ServerConfig IO :~> ExceptT ServantErr IO
@@ -97,7 +88,7 @@ authCheck =
 
 -- | We need to supply our handlers with the right Context. In this case,
 -- Basic Authentication requires a Context Entry with the 'BasicAuthCheck' value
--- tagged with "foo-tag" This context is then supplied to 'server' and threaded 
+-- tagged with "foo-tag" This context is then supplied to 'server' and threaded
 -- to the BasicAuth HasServer handlers.
 basicAuthServerContext :: Context (BasicAuthCheck Teacher ': '[])
 basicAuthServerContext = authCheck :. EmptyContext

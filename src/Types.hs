@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, 
+{-# LANGUAGE DeriveGeneric,
              DeriveFunctor,
              FlexibleInstances,
              OverloadedStrings #-}
@@ -12,6 +12,15 @@ import Data.Typeable (Typeable)
 import Servant.API.BasicAuth (BasicAuthData (BasicAuthData))
 
 type StudentId = Int
+
+type FileId    = Int
+
+data FullName = FullName { firstName :: Text
+                         , lastName :: Text
+                         } deriving (Eq, Show, GHC.Generic)
+
+instance FromJSON FullName
+instance ToJSON FullName
 
 -- | Text file with source code
 data SourceFile = SourceFile { path :: FilePath

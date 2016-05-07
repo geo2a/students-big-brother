@@ -19,7 +19,7 @@ import Control.Eff.Lift
 import Control.Eff.Reader.Lazy
 import Control.Eff.State.Lazy
 import Control.Concurrent
-import qualified GHC.Generics as GHC 
+import qualified GHC.Generics as GHC
 import System.Environment
 import System.Process
 import System.Directory
@@ -37,7 +37,7 @@ import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
 import System.IO.Unsafe (unsafePerformIO)
 
 import API
-import Types 
+import Types
 
 ----------------------
 ---- Domain Types ----
@@ -47,12 +47,12 @@ type RefreshInterval = Int
 
 type ModificationTime = UTCTime
 
-data ClientConfig = ClientConfig 
+data ClientConfig = ClientConfig
   { student_id        :: StudentId
   , first_name        :: Text.Text
   , last_name         :: Text.Text
-  , directory         :: FilePath -- ^ path directory to watch 
-  , refreshRate       :: RefreshInterval -- ^ refresh rate in seconds 
+  , directory         :: FilePath -- ^ path directory to watch
+  , refresh_rate       :: RefreshInterval -- ^ refresh rate in seconds
   , ignore            :: [FilePath] -- ^ list of ignored files
   } deriving (Typeable, Show, GHC.Generic)
 
@@ -62,9 +62,9 @@ instance FromJSON ClientConfig
 instance ToJSON ClientConfig
 
 -- | Type alias for effects set, demanded by application
-type DemandedEffects r = 
+type DemandedEffects r =
   ( Member (Reader ClientConfig) r
-  , Member (State ClientState)   r 
+  , Member (State ClientState)   r
   , SetMember Lift (Lift IO)  r
   )
 
@@ -73,7 +73,7 @@ type DemandedEffects r =
 ------------------------------------------------------------
 
 -- | Consult Server module (Server.hs) for API documentation
-getFiles :<|> registerStudent :<|> updateFilesList = client api
+getFiles :<|> updateFilesList = client api
 --getFiles :<|> updateFilesList = client api (BaseUrl Http "localhost" 8083) manager
 
 --------------------------------
@@ -83,9 +83,9 @@ getFiles :<|> registerStudent :<|> updateFilesList = client api
 readClientConfig :: FilePath -> IO ClientConfig
 readClientConfig fname = do
   contents <- BS.readFile fname
-  case eitherDecode contents of 
+  case eitherDecode contents of
     Left errMsg -> error errMsg
-    Right cfg   -> return cfg 
+    Right cfg   -> return cfg
 
 ------------------------
 ---- Business Logic ----
@@ -98,26 +98,26 @@ manager = unsafePerformIO $ newManager defaultManagerSettings
 loop :: DemandedEffects r => Eff r ()
 loop = do
   cfg <- ask
-  (state :: ClientState) <- get  
-  
-  currentFilesList <- (\\ ignore cfg) <$> 
-    (lift $ getDirectoryContents $ directory cfg) 
+  (state :: ClientState) <- get
+
+  currentFilesList <- (\\ ignore cfg) <$>
+    (lift $ getDirectoryContents $ directory cfg)
   modificationTimes <- lift $ mapM getModificationTime currentFilesList
-  let timedCurrentFilesList = zip currentFilesList modificationTimes 
+  let timedCurrentFilesList = zip currentFilesList modificationTimes
   let timedPreviousFilesList = map (\(f, t) -> (path f, t)) state
-  when (not . null $ 
+  when (not . null $
     timedCurrentFilesList `symmetricDiff` timedPreviousFilesList) $ do
       lift $ putStrLn ("Current files list: " ++ show currentFilesList)
       filesContents <- lift $ mapM Text.IO.readFile currentFilesList
-      let newState = zipWith SourceFile currentFilesList filesContents 
+      let newState = zipWith SourceFile currentFilesList filesContents
       put (zip newState modificationTimes)
-      lift $ runExceptT $ 
-        updateFilesList (student_id cfg) newState manager 
+      lift $ runExceptT $
+        updateFilesList (student_id cfg) newState manager
           (BaseUrl Http "localhost" 8083 "")  -- send files to server
       return ()
-  lift $ threadDelay $ refreshRate cfg 
+  lift $ threadDelay $ refresh_rate cfg
   loop
-    where 
+    where
       symmetricDiff :: Eq a => [a] -> [a] -> [a]
       symmetricDiff xs ys = (xs `union` ys) \\ (xs `intersect` ys)
 
@@ -125,14 +125,14 @@ loop = do
 ------ Sevice functions ----
 ----------------------------
 
--- | Handles all effects produced by application. 
-runApp action cfg initState = 
+-- | Handles all effects produced by application.
+runApp action cfg initState =
   runLift . runState initState . runReader action $ cfg
 
 startClientDaemon :: String -> IO ()
-startClientDaemon cfgFileName = do  
+startClientDaemon cfgFileName = do
   cfg <- readClientConfig cfgFileName
-  setCurrentDirectory $ directory cfg 
+  setCurrentDirectory $ directory cfg
   runApp loop (cfg :: ClientConfig) (initState :: ClientState)
   return ()
     where
