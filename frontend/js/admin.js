@@ -13,7 +13,7 @@ function main() {
       function(result) {
         var teachers = result;
         drawTable(teachers);
-        $("#add-teacher-button").on('click', function(e) {
+        $("#add-teacher-button").click(function() {
           var uname = $("#new-teacher-username").val();
           var pwd = $("#new-teacher-password").val();
           if (isInvalid(uname) || isInvalid(pwd)) {
@@ -35,6 +35,9 @@ function main() {
             url: "http://127.0.0.1:8083/admin/register-teacher",
             data: JSON.stringify(newTeacher),
           });
+        });
+        $('#teachers-list-table').on('click', '.delete-button', function() {
+            console.log("Teacher deleting procedure dummy.");
         });
       }
     });
