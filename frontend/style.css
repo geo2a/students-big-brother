@@ -103,11 +103,14 @@ body {
     display: block;
 }
 
-.login-form-container input {
+input {
     width:100%;
     box-sizing: border-box;
-    margin-bottom: 10px;
-    height: 35px;
+}
+
+.login-form-container input {
+  margin-bottom: 10px;
+  height: 35px;
 }
 
 .login-form-container button {
@@ -135,6 +138,8 @@ footer {
     text-align: center;
     font-weight: bold;
     color: #2e7da3;
+    background-color: rgba(255,255,255,0.75);
+    border-bottom: 1px solid #888888;
 }
 
 table {
@@ -148,27 +153,41 @@ th {
     padding: 2px;
 }
 
-tr {
+/*tr {
   height: 20px;
-}
+}*/
 
 td {
   border: 1px solid rgba(46,125,163,0.2);
   background-color: rgba(46,125,163,0.1);
 }
 
-.teacher-delete-button {
+.teachers-list-container button {
     background-color: rgba(255,255,255,0.75);
     border: 3px solid rgba(46,125,163,0.3);
-    color: #2e7da3;
+    /*color: #2e7da3;*/
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-      width: 100%;
+    width: 100%;
+}
+
+.delete-button {
+    color: rgba(210, 77, 87, 0.9);
 }
 
 .add-button {
+    color: rgba(38, 166, 91, 0.9);
+}
+
+.teachers-list-container input {
+  font-size: inherit;
+  text-align: inherit;
+  height: 20px;
+}
+
+/*.add-form {
   background-color: rgba(46,125,163, 0.6);
   color: rgba(255,255,255,1);
   width: 100%;
@@ -177,4 +196,4 @@ td {
   font-size: 30px;
   /*text-transform: uppercase;*/
   /*font-weight: bold;*/
-}
+}*/
