@@ -58,7 +58,7 @@ server cfg = enter monadNatTransform server'
               :<|>
               updateFiles
               :<|>
-              (registerTeacher :<|> listTeachers)
+              (registerTeacher :<|> listTeachers :<|> deleteTeacher)
       where
         -- | Obtain all files of all students
         getFiles :: Teacher -> ReaderT ServerConfig IO [OwnedSourceFile]
@@ -93,6 +93,13 @@ server cfg = enter monadNatTransform server'
           teachers <- liftIO $ dbListTeachers dbConnection
           liftIO $ dbDisconnect dbConnection
           return teachers
+
+        deleteTeacher :: Int -> ReaderT ServerConfig IO ()
+        deleteTeacher tid = do
+          cfg <- ask
+          dbConnection <- liftIO $ dbConnect $ db cfg
+          liftIO $ dbDeleteTeacher dbConnection tid
+          liftIO $ dbDisconnect dbConnection
 
     monadNatTransform :: ReaderT ServerConfig IO :~> ExceptT ServantErr IO
     monadNatTransform = Nat $ \r -> do

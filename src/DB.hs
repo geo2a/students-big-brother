@@ -83,3 +83,9 @@ dbListTeachers conn = do
   |]
   return . map (uncurry Teacher)
          . map (\(a,b,c) -> (a, Credential b c)) $ teachers
+
+dbDeleteTeacher :: Connection -> Int -> IO ()
+dbDeleteTeacher conn tid =
+  execute conn [sql|
+    DELETE FROM teachers WHERE teacher_id = ?
+  |] (Only tid) >> return ()

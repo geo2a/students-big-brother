@@ -18,10 +18,14 @@ type StudentsAPI =
           :> Post '[JSON] ()
 
 type AdminAPI =
-  "admin" :> "register-teacher"
-          :> ReqBody '[JSON] Credential :> Post '[JSON] Teacher
-          :<|>
-  "admin" :> "list-teachers" :> Get '[JSON] [Teacher]
+  "admin" :> ("register-teacher" :> ReqBody '[JSON] Credential
+                                 :> Post '[JSON] Teacher
+              :<|>
+              "list-teachers" :> Get '[JSON] [Teacher]
+              :<|>
+              "delete-teacher" :> ReqBody '[JSON] Int :> Post '[JSON] ()
+              )
+
 
 
 type API =

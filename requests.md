@@ -23,3 +23,8 @@ curl -X POST -d "[{\"path\": \"file1.hs\", \"contents\": \"source code 1\"}, {\"
 ```
 curl -X POST -d "{\"username\": \"AlanTuring123\", \"password\": \"123\"}" -H 'Accept: application/json' -H 'Content-type: application/json' localhost:8083/admin/register-teacher
 ```
+
+* Delete a specific teacher
+```
+curl -X POST -d "21" -H 'Accept: application/json' -H 'Content-type: application/json' localhost:8083/admin/delete-teacher
+```
