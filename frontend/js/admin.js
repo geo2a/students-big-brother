@@ -37,7 +37,20 @@ function main() {
           });
         });
         $('#teachers-list-table').on('click', '.delete-button', function() {
-            console.log("Teacher deleting procedure dummy.");
+            var rowToDelete = $(this).parent().parent();
+            var teacherToDeleteID = rowToDelete.find("td").first().html();
+            $.ajax({
+              type: "POST",
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+              },
+              success: function() {
+                rowToDelete.remove();
+              },
+              url: "http://127.0.0.1:8083/admin/delete-teacher",
+              data: teacherToDeleteID,
+            });
         });
       }
     });
