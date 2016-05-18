@@ -44,6 +44,16 @@ footer {
     border-left: 1px solid #d4d4d1;
 }
 
+.tabs-container button {
+  height: 60px;
+  width: 60px;
+  float: left;
+  background-color: #2e7da3;
+  color: white;
+  font-size: 40px;
+  display: none;
+}
+
 .tabs-menu li.current {
     position: relative;
     background-color: #fff;
