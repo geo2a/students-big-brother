@@ -30,7 +30,7 @@ instance FromJSON ConnectInfo
 
 type DatabaseConfig = ConnectInfo
 
-type ClientID = Int
+type StudentID = Int
 
 dbConnect :: DatabaseConfig -> IO Connection
 dbConnect = connect
@@ -41,25 +41,25 @@ dbDisconnect = close
 dbSelectAllFiles :: Connection -> IO [OwnedSourceFile]
 dbSelectAllFiles conn = do
   rows <- query_ conn [sql| select * from files |] ::
-              IO [(Integer, ClientID, FilePath, Text.Text)]
+              IO [(Integer, FilePath, Text.Text, StudentID)]
   return $ map readRow rows
     where
-      readRow (_, cid, path, contents) =
-        OwnedSourceFile cid (SourceFile path contents)
+      readRow (_, path, contents, student_id) =
+        OwnedSourceFile student_id (SourceFile path contents)
 
-dbInsertFile :: Connection -> ClientID -> SourceFile -> IO ()
-dbInsertFile conn clientID (SourceFile path contents) =
+dbInsertFile :: Connection -> StudentID -> SourceFile -> IO ()
+dbInsertFile conn student_id (SourceFile path contents) =
   execute conn [sql|
-    INSERT INTO files(clientID, filePath, fileContents) VALUES
-      (?, ?, ?)
-  |] (clientID, path, contents) >> return ()
+    INSERT INTO files(file_id, file_path, file_contents, student_id) VALUES
+      (DEFAULT, ?, ?, ?)
+  |] (path, contents, student_id) >> return ()
 
-dbUpdateFiles :: Connection -> ClientID -> [SourceFile] -> IO ()
-dbUpdateFiles conn clientID files = do
+dbUpdateFiles :: Connection -> StudentID -> [SourceFile] -> IO ()
+dbUpdateFiles conn student_id files = do
   execute conn [sql|
-    DELETE FROM files WHERE clientid = ?
-  |] (Only clientID)
-  mapM_ (dbInsertFile conn clientID) files
+    DELETE FROM files WHERE student_id = ?
+  |] (Only student_id)
+  mapM_ (dbInsertFile conn student_id) files
 
 dbAddTeacher :: Connection -> Credential -> IO Int
 dbAddTeacher conn (Credential uname pwd) = do
