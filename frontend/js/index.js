@@ -4,7 +4,7 @@ $(document).ready(function() {
         var password = $("#login-password").val();
 
         // Authenticate teacher and ask server for array of students data
-        $.ajax({
+        var retrieveStudentsData = function(){$.ajax({
             type: "GET",
             url: "http://127.0.0.1:8083/files",
             dataType: "json",
@@ -30,13 +30,20 @@ $(document).ready(function() {
                 },
             success:
                 function(result) {
+                    console.log("privet");
                     // hide warnings if presented
                     $(".warning").hide();
 
                     // hide login form
                     $("#login-form").hide();
 
-                    var sourceFiles = result;
+                    var sourceFiles = result
+                    console.log("privet");
+                    // hide warnings if presented
+                    $(".warning").hide();
+
+                    // hide login form
+                    $("#login-form").hide;
                     // calculate unique user ids
                     var uids = _.chain(sourceFiles)
                         .map(function(file) {
@@ -52,6 +59,11 @@ $(document).ready(function() {
                         var groupedFiles = _.chain(sourceFiles)
                             .groupBy(function(x) {return x.uid;})
                             .value();
+
+                        // delete all tabs from preveous state
+                        // TODO: refactor this shit, it's terribale; It would be good ta have state monad here...
+                        $("#tabs").empty();
+                        $("#tabs-contents").empty();
 
                         // build students list on the ui
                         var studentTabs = document.getElementById("tabs");
@@ -103,7 +115,9 @@ $(document).ready(function() {
                     }
                 }
         }
-        );
+      );}
+        retrieveStudentsData();
+        setInterval(retrieveStudentsData, 5000);
     });
 });
 
