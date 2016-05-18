@@ -31,7 +31,7 @@ $(document).ready(function() {
             success:
                 function(result) {
                     // hide warnings if presented
-                    $(".warning-container").hide();
+                    $(".warning").hide();
 
                     // hide login form
                     $("#login-form").hide();
