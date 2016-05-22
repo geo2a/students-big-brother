@@ -1,15 +1,9 @@
 # Example API requests
 
-* Obtain files for all users as JSON via GET request
+* Obtain files via GET request
 
 ```
-curl -H 'Accept: application/json' localhost:8083/files
-```
-
-* Obtain files for all users as HTML via GET request
-
-```
-curl -H 'Accept: text/html' localhost:8083/files
+curl -u Alan:Turing localhost:8083/files
 ```
 
 * Send current files list for user 42 via POST request
