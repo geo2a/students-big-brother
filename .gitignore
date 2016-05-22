@@ -1,3 +1,5 @@
+# Haskell #
+###########
 dist
 cabal-dev
 *.o
@@ -15,8 +17,17 @@ cabal.sandbox.config
 *.hp
 .stack-work/
 
-# user files
-aux/
+# JS #
+######
+node_modules
+npm-debug.log
+.tmp
+.idea
+public
+compiled
+.swp
 
-# misc
+# misc #
+########
 screenshots/
+aux/

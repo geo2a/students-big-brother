@@ -1,0 +1,32 @@
+{
+  "name": "students-big-brother-frontend",
+  "version": "0.1.0",
+  "description": "Single page application to communicate witn Students Big Brother",
+  "main": "src/index.js",
+  "dependencies": {
+    "babel-polyfill": "^6.9.0"
+  },
+  "devDependencies": {
+    "autoprefixer-loader": "^2.0.0",
+    "babel-core": "^6.1.2",
+    "babel-loader": "^6.0.1",
+    "babel-preset-es2015": "^6.1.2",
+    "babel-preset-stage-0": "^6.5.0",
+    "node-libs-browser": "^0.5.2",
+    "webpack": "^1.10.0",
+    "webpack-dev-server": "^1.10.1"
+  },
+  "scripts": {
+    "start": "node_modules/webpack-dev-server/bin/webpack-dev-server.js"
+  },
+  "keywords": [
+    "webpack",
+    "webpack-dev-server",
+    "template",
+    "starter",
+    "es6",
+    "babel"
+  ],
+  "author": "Georgiy Lukyanov <georgiylukjanov@gmail.com>",
+  "license": "MIT"
+}
