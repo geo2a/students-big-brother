@@ -1,47 +1,51 @@
+"use strict"
+
 $(document).ready(function() {
-    $("#login-button").on('click', function(e) {
+    $("#login-button").on('click', async function(e) {
         var username = $("#login-username").val();
         var password = $("#login-password").val();
 
-        retrieveStudentsData(username, password)();
-        $("#students-list-refresh-button").on('click', function(e) {
-          retrieveStudentsData(username, password)();
+        let t = await retrieveStudentsData(username, password)
+        updateUI(t)
+
+        // retrieveStudentsData(username, password)();
+        $("#students-list-refresh-button").on('click', async function(e) {
+          t = await retrieveStudentsData(username, password)
+          updateUI(t)
         });
-        // setInterval(retrieveStudentsData(username, password), 5000);
+        // // setInterval(retrieveStudentsData(username, password), 5000);
     });
+
 });
 
 // Authenticate teacher and ask server for array of students data
-function retrieveStudentsData(username, password) {
-  return function(){$.ajax({
-      type: "GET",
-      url: "http://127.0.0.1:8083/files",
-      dataType: "json",
-      headers: {
-          "Authorization": "Basic " + btoa(username + ":" + password)
-        },
-      error:
-          function(jqXHR, textStatus, errorThrown) {
-              switch(jqXHR.status) {
-                  case 500:
-                      $("#500-warning").show();
-                      break;
-                  case 401, 403:
-                      $("#401-403-warning").show();
-                      break;
-                  default:
-                      console.log(textStatus + "," +
-                                  errorThrown + "," +
-                                  jqXHR.responseText);
-                      console.log(arguments);
-                      $("#unknown-error-warning").show();
-              }
-          },
-      success: onSuccess
-  });}
+async function retrieveStudentsData(username, password) {
+  const fetchOptions = { method: "GET"
+                       , headers: { 'Accept': 'application/json'
+                                  , "Authorization": "Basic " +
+                                     btoa(username + ":" + password)
+                         }
+                       , mode: "cors"
+                       }
+  const errorHandler = error => {
+    console.log(error)
+    switch(error.code) {
+        case 500:
+            $("#500-warning").show()
+            break;
+        case 401, 403:
+            $("#401-403-warning").show()
+            break;
+        default:
+            $("#unknown-error-warning").show()
+    }
+  }
+  return await fetch("http://localhost:8083/files", fetchOptions)
+                    .then(response => response.json())
+                    .catch(errorHandler)
 }
 
-function onSuccess(result) {
+function updateUI(result) {
       // hide warnings if presented
       $(".warning").hide();
 
@@ -52,7 +56,6 @@ function onSuccess(result) {
       $("#students-list-refresh-button").show();
 
       var sourceFiles = result
-      console.log("privet");
       // hide warnings if presented
       $(".warning").hide();
 

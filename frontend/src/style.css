@@ -8,7 +8,7 @@ header {
 }
 
 body {
-    background-image: url("resources/background.jpg");
+    background-image: url("background.jpg");
     width: 800px;
     margin: auto;
     padding: 0px;
