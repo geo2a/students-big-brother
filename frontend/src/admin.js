@@ -19,7 +19,8 @@ async function main() {
   const errorHandler = error => {
     console.log(error)
   }
-  const teachers = await fetch( "http://${hostname}:8083/admin/list-teachers"
+  const teachers = await fetch( "http://" + hostname
+                                          + ":8083/admin/list-teachers"
                               , fetchOptions)
                               .then(response => response.json())
                               .catch(errorHandler)
@@ -43,7 +44,7 @@ async function main() {
         success: function(justAddedTeacher) {
           drawRow(justAddedTeacher)
         },
-        url: "http://${hostname}:8083/admin/register-teacher",
+        url: "http://" + hostname + ":8083/admin/register-teacher",
         data: JSON.stringify(newTeacher),
       })
   })
@@ -59,7 +60,7 @@ async function main() {
        success: function() {
          rowToDelete.remove();
        },
-       url: "http://${hostname}:8083/admin/delete-teacher",
+       url: "http://" + hostname + ":8083/admin/delete-teacher",
        data: teacherToDeleteID,
      })
   })
