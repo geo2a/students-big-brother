@@ -5,6 +5,8 @@ import $ from 'jquery'
 import  _ from 'lodash'
 import './style.css'
 
+const hostname = "http://ec2-54-186-163-30.us-west-2.compute.amazonaws.com/"
+
 // module.exports = function () {
 $("document-ready", function () {
     $("#login-button").on('click', async function(e) {
@@ -45,7 +47,7 @@ async function retrieveStudentsData(username, password) {
             $("#unknown-error-warning").show()
     }
   }
-  return await fetch("http://ec2-54-186-163-30.us-west-2.compute.amazonaws.com:8083/files", fetchOptions)
+  return await fetch("http://${hostname}:8083/files", fetchOptions)
                     .then(response => response.json())
                     .catch(errorHandler)
 }
