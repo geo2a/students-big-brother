@@ -141,7 +141,7 @@ function renderStudentsTabsList(uids, studentTabs) {
     var studentTab = document.createElement("li");
     var a = document.createElement('a');
     a.href =  "#tab-" + uid;
-    a.innerHTML = "Student " + uid;
+    a.innerHTML = uid;
     studentTab.appendChild(a);
     studentTabs.appendChild(studentTab);
   });

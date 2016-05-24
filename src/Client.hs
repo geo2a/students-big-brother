@@ -50,6 +50,7 @@ type ModificationTime = UTCTime
 data ClientConfig = ClientConfig
   { student_id        :: StudentId
   , first_name        :: Text.Text
+  , middle_name       :: Text.Text
   , last_name         :: Text.Text
   , directory         :: FilePath -- ^ path directory to watch
   , refresh_rate      :: RefreshInterval -- ^ refresh rate in seconds
