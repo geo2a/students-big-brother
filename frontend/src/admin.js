@@ -1,121 +1,72 @@
 "use strict"
 
+import $ from 'jquery'
+import _ from 'lodash'
+import './style.css'
+
 $(document).ready(main);
 
 async function main() {
   const fetchOptions = { method: "GET"
-                       , headers: { 'Accept': 'application/json'
-                                  , "Authorization": "Basic " +
-                                     btoa(username + ":" + password)
-                         }
+                      //  , headers: { 'Accept': 'application/json'
+                      //             , "Authorization": "Basic " +
+                      //                btoa(username + ":" + password)
+                      //  }
                        , mode: "cors"
                        }
   const errorHandler = error => {
     console.log(error)
   }
   const teachers = await fetch( "http://localhost:8083/admin/list-teachers"
-                          , fetchOptions)
+                              , fetchOptions)
                          .then(response => response.json())
                          .catch(errorHandler)
   drawTable(teachers);
   $("#add-teacher-button").click(function() {
-    var uname = $("#new-teacher-username").val();
-    var pwd = $("#new-teacher-password").val();
-    if (isInvalid(uname) || isInvalid(pwd)) {
-      alert("Username or Password is invalid!");
-      return;
-    }
-    var newTeacher = { username:uname
-                     , password:pwd
-                     };
-    $.ajax({
-      type: "POST",
-      headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-      },
-      success: function(justAddedTeacher) {
-        drawRow(justAddedTeacher);
-      },
-      url: "http://127.0.0.1:8083/admin/register-teacher",
-      data: JSON.stringify(newTeacher),
-   });
-   $('#teachers-list-table').on('click', '.delete-button', function() {
-       var rowToDelete = $(this).parent().parent();
-       var teacherToDeleteID = rowToDelete.find("td").first().html();
-       $.ajax({
-         type: "POST",
-         headers: {
-             'Accept': 'application/json',
-             'Content-Type': 'application/json'
-         },
-         success: function() {
-           rowToDelete.remove();
-         },
-         url: "http://127.0.0.1:8083/admin/delete-teacher",
-         data: teacherToDeleteID,
-       });
-   });
-  // $.ajax({
-  //   type: "GET",
-  //   url: "http://127.0.0.1:8083/admin/list-teachers",
-  //   dataType: 'json',
-  //   error:
-  //       function(jqXHR, textStatus, errorThrown) {
-  //           console.log("FUCK YOU YOU FUCKING FUCK!!!");
-  //       },
-  //   success:
-  //     function(result) {
-  //       var teachers = result;
-  //       drawTable(teachers);
-  //       $("#add-teacher-button").click(function() {
-  //         var uname = $("#new-teacher-username").val();
-  //         var pwd = $("#new-teacher-password").val();
-  //         if (isInvalid(uname) || isInvalid(pwd)) {
-  //           alert("Username or Password is invalid!");
-  //           return;
-  //         }
-  //         var newTeacher = { username:uname
-  //                          , password:pwd
-  //                          };
-  //         $.ajax({
-  //           type: "POST",
-  //           headers: {
-  //               'Accept': 'application/json',
-  //               'Content-Type': 'application/json'
-  //           },
-  //           success: function(justAddedTeacher) {
-  //             drawRow(justAddedTeacher);
-  //           },
-  //           url: "http://127.0.0.1:8083/admin/register-teacher",
-  //           data: JSON.stringify(newTeacher),
-  //         });
-  //       });
-  //       $('#teachers-list-table').on('click', '.delete-button', function() {
-  //           var rowToDelete = $(this).parent().parent();
-  //           var teacherToDeleteID = rowToDelete.find("td").first().html();
-  //           $.ajax({
-  //             type: "POST",
-  //             headers: {
-  //                 'Accept': 'application/json',
-  //                 'Content-Type': 'application/json'
-  //             },
-  //             success: function() {
-  //               rowToDelete.remove();
-  //             },
-  //             url: "http://127.0.0.1:8083/admin/delete-teacher",
-  //             data: teacherToDeleteID,
-  //           });
-  //       });
-  //     }
-  //   });
+      var uname = $("#new-teacher-username").val();
+      var pwd = $("#new-teacher-password").val();
+      if (isInvalid(uname) || isInvalid(pwd)) {
+        alert("Username or Password is invalid!");
+        return;
+      }
+      var newTeacher = { username:uname
+                       , password:pwd
+                       };
+      $.ajax({
+        type: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        success: function(justAddedTeacher) {
+          drawRow(justAddedTeacher)
+        },
+        url: "http://127.0.0.1:8083/admin/register-teacher",
+        data: JSON.stringify(newTeacher),
+      })
+  })
+  $('#teachers-list-table').on('click', '.delete-button', function() {
+     const rowToDelete = $(this).parent().parent()
+     const teacherToDeleteID = rowToDelete.find("td").first().html()
+     $.ajax({
+       type: "POST",
+       headers: {
+           'Accept': 'application/json',
+           'Content-Type': 'application/json'
+       },
+       success: function() {
+         rowToDelete.remove();
+       },
+       url: "http://127.0.0.1:8083/admin/delete-teacher",
+       data: teacherToDeleteID,
+     })
+  })
 }
 
 function drawTable(data) {
     for (var i = 0; i < data.length; ++i) {
         drawRow(data[i]);
     }
-
 }
 
 function drawRow(rowData) {

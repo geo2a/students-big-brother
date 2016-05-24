@@ -1,9 +1,15 @@
 "use strict"
 
-$(document).ready(function() {
+// const $ = require('jquery');
+import $ from 'jquery'
+import  _ from 'lodash'
+import './style.css'
+
+// module.exports = function () {
+$("document-ready", function () {
     $("#login-button").on('click', async function(e) {
-        var username = $("#login-username").val();
-        var password = $("#login-password").val();
+        const username = $("#login-username").val();
+        const password = $("#login-password").val();
 
         let t = await retrieveStudentsData(username, password)
         updateUI(t)
@@ -15,8 +21,7 @@ $(document).ready(function() {
         });
         // // setInterval(retrieveStudentsData(username, password), 5000);
     });
-
-});
+})
 
 // Authenticate teacher and ask server for array of students data
 async function retrieveStudentsData(username, password) {

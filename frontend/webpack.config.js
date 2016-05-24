@@ -1,31 +1,51 @@
-var path = require('path');
-var webpack = require('webpack');
+const path = require('path')
+const webpack = require('webpack')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const production = process.env.NODE_ENV === 'production'
+
+let plugins = []
+
+// if (production) {
+    plugins = plugins.concat([
+      new webpack.optimize.UglifyJsPlugin({
+          mangle:   true,
+          compress: {
+              warnings: false, // Suppress uglification warnings
+          },
+      }),
+      new CopyWebpackPlugin([
+          { from: 'src/index.html', to: 'index.html' },
+          { from: 'src/admin.html', to: 'admin.html' }
+      ])
+    ]);
+// }
 
 module.exports = {
-  entry: [
-    'babel-polyfill',
-    './src/main',
-    'webpack-dev-server/client?http://localhost:8080'
-  ],
-  output: {
-      publicPath: '/',
-      filename: 'main.js'
+  entry: {
+    index: ['babel-polyfill','./src/index.js'],
+    admin: ['babel-polyfill','./src/admin.js'],
   },
-  debug: true,
-  devtool: 'source-map',
+  output: {
+    path: "./dist",
+    publicPath: "/",
+    filename: "[name].bundle.js"
+  },
+  debug:   !production,
+  devtool: production ? false : 'eval',
   module: {
     loaders: [
+      { test: /\.css$/, loaders: ['style', 'css'] },
+      { test: /\.html/, loader: "file" },
+      { test:   /\.(png|gif|jpe?g|svg)$/, loader: 'url'},
       {
         test: /\.js$/,
         include: path.join(__dirname, 'src'),
-        loader: 'babel-loader',
+        loader:  'babel',
         query: {
           presets: ['es2015', 'stage-0']
         }
       },
     ]
   },
-  devServer: {
-    contentBase: "./src"
-  }
+  plugins
 };
