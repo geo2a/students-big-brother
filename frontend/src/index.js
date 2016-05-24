@@ -4,8 +4,12 @@
 import $ from 'jquery'
 import  _ from 'lodash'
 import './style.css'
+// import cfg from 'cfg.json'
 
-const hostname = "http://ec2-54-186-163-30.us-west-2.compute.amazonaws.com/"
+const cfg = JSON.parse(require("./cfg.json"))
+const hostname = cfg.hostname
+
+// const hostname = "http://ec2-54-186-163-30.us-west-2.compute.amazonaws.com/"
 
 // module.exports = function () {
 $("document-ready", function () {

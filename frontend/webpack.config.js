@@ -35,7 +35,7 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.css$/, loaders: ['style', 'css'] },
-      { test: /\.html/, loader: "file" },
+      { test: /\.json$/, loader: 'raw-loader' },
       { test:   /\.(png|gif|jpe?g|svg)$/, loader: 'url'},
       {
         test: /\.js$/,

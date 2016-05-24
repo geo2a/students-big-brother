@@ -4,7 +4,8 @@ import $ from 'jquery'
 import _ from 'lodash'
 import './style.css'
 
-const hostname = "http://ec2-54-186-163-30.us-west-2.compute.amazonaws.com/"
+var cfg = JSON.parse(require("./cfg.json"))
+const hostname = cfg.hostname
 
 $(document).ready(main);
 
@@ -19,7 +20,7 @@ async function main() {
   const errorHandler = error => {
     console.log(error)
   }
-  const teachers = await fetch( "http://" + hostname
+  const teachers = await fetch( "http://" + "localhost"
                                           + ":8083/admin/list-teachers"
                               , fetchOptions)
                               .then(response => response.json())
