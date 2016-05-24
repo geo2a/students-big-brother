@@ -52,8 +52,10 @@ data ClientConfig = ClientConfig
   , first_name        :: Text.Text
   , last_name         :: Text.Text
   , directory         :: FilePath -- ^ path directory to watch
-  , refresh_rate       :: RefreshInterval -- ^ refresh rate in seconds
+  , refresh_rate      :: RefreshInterval -- ^ refresh rate in seconds
   , ignore            :: [FilePath] -- ^ list of ignored files
+  , server_hostname   :: Text.Text
+  , server_port       :: Int
   } deriving (Typeable, Show, GHC.Generic)
 
 type ClientState = [(SourceFile, ModificationTime)]
@@ -100,8 +102,9 @@ loop = do
   cfg <- ask
   (state :: ClientState) <- get
 
+  dirPath <- lift $ getCurrentDirectory
   currentFilesList <- (\\ ignore cfg) <$>
-    (lift $ getDirectoryContents $ directory cfg)
+    (lift $ getDirectoryContents $ dirPath)
   modificationTimes <- lift $ mapM getModificationTime currentFilesList
   let timedCurrentFilesList = zip currentFilesList modificationTimes
   let timedPreviousFilesList = map (\(f, t) -> (path f, t)) state
@@ -113,7 +116,8 @@ loop = do
       put (zip newState modificationTimes)
       lift $ runExceptT $
         updateFilesList (student_id cfg) newState manager
-          (BaseUrl Http "localhost" 8083 "")  -- send files to server
+          (BaseUrl Http (Text.unpack $ server_hostname cfg)
+                        (server_port cfg) "")
       return ()
   lift $ threadDelay $ refresh_rate cfg
   loop
