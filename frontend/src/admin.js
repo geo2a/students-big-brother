@@ -21,8 +21,8 @@ async function main() {
   }
   const teachers = await fetch( "http://${hostname}:8083/admin/list-teachers"
                               , fetchOptions)
-                         .then(response => response.json())
-                         .catch(errorHandler)
+                              .then(response => response.json())
+                              .catch(errorHandler)
   drawTable(teachers);
   $("#add-teacher-button").click(function() {
       var uname = $("#new-teacher-username").val();
@@ -43,7 +43,7 @@ async function main() {
         success: function(justAddedTeacher) {
           drawRow(justAddedTeacher)
         },
-        url: "http://127.0.0.1:8083/admin/register-teacher",
+        url: "http://${hostname}:8083/admin/register-teacher",
         data: JSON.stringify(newTeacher),
       })
   })
@@ -59,7 +59,7 @@ async function main() {
        success: function() {
          rowToDelete.remove();
        },
-       url: "http://127.0.0.1:8083/admin/delete-teacher",
+       url: "http://${hostname}:8083/admin/delete-teacher",
        data: teacherToDeleteID,
      })
   })
