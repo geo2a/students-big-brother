@@ -1,5 +1,5 @@
 { "db":{ "connectPort":5432
-       , "connectPassword":"123"
+       , "connectPassword":"pwd"
        , "connectUser":"students_big_brother"
        , "connectDatabase":"students_big_brother_db"
        , "connectHost":"127.0.0.1"}

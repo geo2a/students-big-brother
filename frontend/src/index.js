@@ -45,7 +45,7 @@ async function retrieveStudentsData(username, password) {
             $("#unknown-error-warning").show()
     }
   }
-  return await fetch("http://localhost:8083/files", fetchOptions)
+  return await fetch("http://ec2-54-186-163-30.us-west-2.compute.amazonaws.com:8083/files", fetchOptions)
                     .then(response => response.json())
                     .catch(errorHandler)
 }
