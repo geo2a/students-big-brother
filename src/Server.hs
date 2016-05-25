@@ -56,7 +56,7 @@ server cfg = enter monadNatTransform server'
     server' :: ServerT API (ReaderT ServerConfig IO)
     server' = getFiles
               :<|>
-              updateFiles
+              (updateFiles :<|> registerStudent)
               :<|>
               (registerTeacher :<|> listTeachers :<|> deleteTeacher)
       where
@@ -77,6 +77,14 @@ server cfg = enter monadNatTransform server'
           dbConnection <- liftIO $ dbConnect $ db cfg
           liftIO $ dbUpdateFiles dbConnection uid files
           liftIO $ dbDisconnect dbConnection
+
+        registerStudent :: Student -> ReaderT ServerConfig IO Student
+        registerStudent student = do
+          cfg <- ask
+          dbConnection <- liftIO $ dbConnect $ db cfg
+          teacherId <- liftIO $ dbAddStudent dbConnection student
+          liftIO $ dbDisconnect dbConnection
+          return student
 
         registerTeacher :: Credential -> ReaderT ServerConfig IO Teacher
         registerTeacher crd = do

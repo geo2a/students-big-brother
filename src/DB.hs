@@ -1,5 +1,4 @@
-{-# LANGUAGE OverloadedStrings
-           , FlexibleContexts
+{-# LANGUAGE OverloadedStrings           , FlexibleContexts
            , TemplateHaskell
            , QuasiQuotes
            , DeriveGeneric
@@ -60,6 +59,14 @@ dbUpdateFiles conn student_id files = do
     DELETE FROM files WHERE student_id = ?
   |] (Only student_id)
   mapM_ (dbInsertFile conn student_id) files
+
+dbAddStudent :: Connection -> Student -> IO Int
+dbAddStudent conn (Student sId fname mname lname) = do
+  student_id :: [Only Int] <- query conn [sql|
+    INSERT INTO students (student_id, first_name, middle_name, last_name)
+      VALUES (?,?,?,?) RETURNING student_id
+  |] (sId, fname, mname, lname)
+  return . fromOnly . head $ student_id
 
 dbAddTeacher :: Connection -> Credential -> IO Int
 dbAddTeacher conn (Credential uname pwd) = do

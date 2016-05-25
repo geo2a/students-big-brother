@@ -13,6 +13,15 @@ import Servant.API.BasicAuth (BasicAuthData (BasicAuthData))
 
 type StudentId = Int
 
+data Student = Student { s_id   :: StudentId
+                       , f_name :: Text
+                       , m_name :: Text
+                       , l_name :: Text
+                       } deriving (Eq, Show, GHC.Generic)
+
+instance FromJSON Student
+instance ToJSON Student
+
 type FileId    = Int
 
 -- data FullName = FullName { firstName :: Text

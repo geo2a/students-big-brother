@@ -77,7 +77,7 @@ type DemandedEffects r =
 
 -- | Consult Server module (Server.hs) for API documentation
 -- | TODO: restrict client API, client daemon doesn't need to have access to non-student API
-getFiles :<|> updateFilesList :<|> registerTeacher = client api
+updateFilesList :<|> registerStudent = client students_api
 
 --------------------------------
 ---- Parsing Configurations ----
@@ -101,6 +101,12 @@ manager = unsafePerformIO $ newManager defaultManagerSettings
 loop :: DemandedEffects r => Eff r ()
 loop = do
   cfg <- ask
+
+  let student = Student (student_id cfg) (first_name cfg)
+                        (middle_name cfg) (last_name cfg)
+      url = (BaseUrl Http (Text.unpack $ server_hostname cfg)
+                          (server_port cfg) "")
+
   (state :: ClientState) <- get
 
   dirPath <- lift $ getCurrentDirectory
@@ -116,9 +122,7 @@ loop = do
       let newState = zipWith SourceFile currentFilesList filesContents
       put (zip newState modificationTimes)
       lift $ runExceptT $
-        updateFilesList (student_id cfg) newState manager
-          (BaseUrl Http (Text.unpack $ server_hostname cfg)
-                        (server_port cfg) "")
+        updateFilesList (student_id cfg) newState manager url
       return ()
   lift $ threadDelay $ refresh_rate cfg
   loop
@@ -131,7 +135,14 @@ loop = do
 ----------------------------
 
 -- | Handles all effects produced by application.
-runApp action cfg initState =
+runApp action cfg initState = do
+  let student = Student (student_id cfg) (first_name cfg)
+                        (middle_name cfg) (last_name cfg)
+      url = (BaseUrl Http (Text.unpack $ server_hostname cfg)
+                          (server_port cfg) "")
+
+  runExceptT $ registerStudent student manager url
+
   runLift . runState initState . runReader action $ cfg
 
 startClientDaemon :: String -> IO ()

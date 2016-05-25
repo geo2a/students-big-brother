@@ -29,6 +29,12 @@ CREATE TABLE teachers ( teacher_id serial PRIMARY KEY
                       , password varchar(32) NOT NULL -- security? Ha-Ha.
                       );
 
+CREATE TABLE students ( student_id integer PRIMARY KEY
+                      , first_name varchar(32) NOT NULL
+                      , middle_name varchar(32) NOT NULL
+                      , last_name varchar(32) NOT NULL
+                      );
+
 GRANT USAGE, SELECT ON SEQUENCE files_file_id_seq TO students_big_brother;
 GRANT USAGE, SELECT ON SEQUENCE students_student_id_seq TO students_big_brother;
 ALTER SEQUENCE files_file_id_seq RESTART WITH 1;

@@ -16,6 +16,9 @@ type StudentsAPI =
   "files" :> Capture "student_id" StudentId
           :> ReqBody '[JSON] [SourceFile]
           :> Post '[JSON] ()
+  :<|>
+  "register-student" :> ReqBody '[JSON] Student
+                     :> Post '[JSON] Student
 
 type AdminAPI =
   "admin" :> ("register-teacher" :> ReqBody '[JSON] Credential
@@ -34,6 +37,9 @@ type API =
   StudentsAPI
   :<|>
   AdminAPI
+
+students_api :: Proxy StudentsAPI
+students_api = Proxy
 
 api :: Proxy API
 api = Proxy
