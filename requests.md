@@ -18,6 +18,12 @@ curl -X POST -d "[{\"path\": \"file1.hs\", \"contents\": \"source code 1\"}, {\"
 curl -X POST -d "{\"username\": \"AlanTuring\", \"password\": \"123\"}" -H 'Accept: application/json' -H 'Content-type: application/json' localhost:8083/admin/register-teacher
 ```
 
+* Register a new student
+
+```
+curl -X POST -d "{\"s_id\": \"42\", \"f_name\": \"Alan\", \"m_name\": \"Alan\", \"l_name\": \"Turing\"}" -H 'Accept: application/json' -H 'Content-type: application/json' localhost:8083/register-student
+```
+
 * Delete a specific teacher
 ```
 curl -X POST -d "21" -H 'Accept: application/json' -H 'Content-type: application/json' localhost:8083/admin/delete-teacher
