@@ -18,6 +18,7 @@ $("document-ready", function () {
         const password = $("#login-password").val();
 
         let t = await retrieveStudentsData(username, password)
+
         updateUI(t)
 
         // retrieveStudentsData(username, password)();
@@ -73,13 +74,14 @@ function updateUI(result) {
       // hide login form
       $("#login-form").hide;
       // calculate unique user ids
+
       var uids = calculateUniqueIDs(sourceFiles)
 
       if (uids.length == 0) {
           $("#no-students-warning").show();
       } else {
           var groupedFiles = _.chain(sourceFiles)
-              .groupBy(function(x) {return x.uid;})
+              .groupBy(function(x) {return x.student.s_id;})
               .value();
 
           // delete all tabs from preveous state
@@ -92,7 +94,7 @@ function updateUI(result) {
           var studentTabsContents =
               document.getElementById("tabs-contents");
 
-          renderStudentsTabsList(uids, studentTabs);
+          renderStudentsTabsList(uids, groupedFiles, studentTabs);
 
           renderStudentsTabsContents(uids, groupedFiles, studentTabsContents);
 
@@ -135,13 +137,13 @@ function renderStudentsTabsContents(uids, groupedFiles, studentTabsContents) {
   });
 }
 
-function renderStudentsTabsList(uids, studentTabs) {
+function renderStudentsTabsList(uids, groupedFiles, studentTabs) {
   _.forEach(uids, function(uid) {
     // students tabs list
     var studentTab = document.createElement("li");
     var a = document.createElement('a');
     a.href =  "#tab-" + uid;
-    a.innerHTML = uid;
+    a.innerHTML = groupedFiles[uid][0].student.l_name;
     studentTab.appendChild(a);
     studentTabs.appendChild(studentTab);
   });
@@ -150,7 +152,7 @@ function renderStudentsTabsList(uids, studentTabs) {
 function calculateUniqueIDs(sourceFiles) {
   return _.chain(sourceFiles)
           .map(function(file) {
-             return file.uid;
+             return file.student.s_id;
           })
           .uniq()
           .sortBy()

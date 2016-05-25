@@ -39,12 +39,18 @@ dbDisconnect = close
 
 dbSelectAllFiles :: Connection -> IO [OwnedSourceFile]
 dbSelectAllFiles conn = do
-  rows <- query_ conn [sql| select * from files |] ::
-              IO [(Integer, FilePath, Text.Text, StudentID)]
+  rows <- query_ conn [sql|
+      select file_id, file_path, file_contents
+             , students.student_id, first_name, middle_name, last_name
+        from files
+          inner join students on files.student_id = students.student_id;
+    |] :: IO [( Integer, FilePath, Text.Text
+              , StudentID, Text.Text, Text.Text, Text.Text)]
   return $ map readRow rows
     where
-      readRow (_, path, contents, student_id) =
-        OwnedSourceFile student_id (SourceFile path contents)
+      readRow (_, path, contents, student_id, f_name, m_name, l_name) =
+        OwnedSourceFile (Student student_id f_name m_name l_name)
+                        (SourceFile path contents)
 
 dbInsertFile :: Connection -> StudentID -> SourceFile -> IO ()
 dbInsertFile conn student_id (SourceFile path contents) =

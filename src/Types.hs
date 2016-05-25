@@ -51,7 +51,7 @@ instance FromJSON SourceFile
 instance ToJSON SourceFile
 
 -- | SourceFile with assigned user id
-data OwnedSourceFile = OwnedSourceFile { uid :: StudentId
+data OwnedSourceFile = OwnedSourceFile { student :: Student
                                        , file :: SourceFile
                                        } deriving (Eq, Show, GHC.Generic)
 
