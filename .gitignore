@@ -31,5 +31,6 @@ frontend/dist
 
 # misc #
 ########
+cfg/
 screenshots/
 aux/
