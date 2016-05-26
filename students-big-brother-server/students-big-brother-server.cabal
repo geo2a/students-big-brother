@@ -1,0 +1,38 @@
+name:                students-big-brother-server
+version:             0.1.0
+description:         Please see README.md
+homepage:            http://github.com/geo2a/students-big-brother#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Georgiy Lukjanov
+maintainer:          georgiylukjanov@gmail.com
+copyright:           2016 Georgiy Lukjanov
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable students-big-brother-server
+  hs-source-dirs:      src, app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , either
+                     , transformers
+                     , text
+                     , bytestring
+                     , aeson
+                     , servant >= 0.6.1
+                     , servant-server >= 0.6.1
+                     , wai
+                     , wai-cors
+                     , warp
+                     , postgresql-simple
+                     , students-big-brother-types
+  default-language:    Haskell2010
+  other-modules:       Server
+                     , DB
+
+
+source-repository head
+  type:     git
+  location: https://github.com/githubuser/students-big-brother

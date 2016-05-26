@@ -21,9 +21,9 @@ import Network.Wai
 import Network.Wai.Middleware.Cors
 import Servant
 
+import Types
 import API
 import DB
-import Types
 
 -- | Server configuration
 data ServerConfig = ServerConfig
