@@ -6,6 +6,7 @@ resolver: lts-6.0
 # Local packages, usually specified by relative directory name
 packages:
 - students-big-brother-server/
+- client-config-generator/
 - students-big-brother-client/
 - students-big-brother-types/
 

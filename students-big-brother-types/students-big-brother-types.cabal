@@ -1,7 +1,7 @@
 name:                students-big-brother-types
 version:             0.1.0
 description:         Please see README.md
-homepage:            http://github.com/geo2a/students-big-brother#readme
+homepage:            http://github.com/geo2a/students-big-brother
 license:             BSD3
 license-file:        LICENSE
 author:              Georgiy Lukjanov

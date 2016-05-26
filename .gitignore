@@ -33,3 +33,5 @@ frontend/dist
 cfg/
 screenshots/
 aux/
+.zip
+out/
