@@ -18,7 +18,6 @@ import Data.Aeson
 import Data.Text.Encoding (decodeUtf8)
 import Network.Wai.Handler.Warp
 import Network.Wai
-import Network.Wai.Middleware.Cors
 import Servant
 
 import Types
@@ -47,7 +46,7 @@ startServer cfgFileName = do
   run (port cfg) (app cfg)
 
 app :: ServerConfig -> Application
-app cfg = simpleCors $ serveWithContext api (basicAuthServerContext cfg)
+app cfg = serveWithContext api (basicAuthServerContext cfg)
                        (server cfg)
 
 server :: ServerConfig -> Server API

@@ -16,15 +16,13 @@ executable students-big-brother-server
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
-                     , either
                      , transformers
                      , text
                      , bytestring
                      , aeson
-                     , servant >= 0.6.1
-                     , servant-server >= 0.6.1
+                     , servant
+                     , servant-server
                      , wai
-                     , wai-cors
                      , warp
                      , postgresql-simple
                      , students-big-brother-types
