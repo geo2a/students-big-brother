@@ -1,8 +1,8 @@
-# TUTORIAL IS UNDER CONSTRUCTION
-
 # Students Big Brother
 
 Some logo here 
+
+[![Build Status](https://travis-ci.org/geo2a/sbb-travis-test.svg?branch=master)](https://travis-ci.org/geo2a/sbb-travis-test)
 
 ## Description 
 
