@@ -16,7 +16,9 @@ import qualified Data.Text as Text
 import qualified Data.ByteString.Lazy as BS
 import Data.Aeson
 import Data.Text.Encoding (decodeUtf8)
+import qualified Network.Wai as WAI
 import Network.Wai.Handler.Warp
+import Network.Wai.Middleware.Cors
 import Network.Wai
 import Servant
 
@@ -46,8 +48,19 @@ startServer cfgFileName = do
   run (port cfg) (app cfg)
 
 app :: ServerConfig -> Application
-app cfg = serveWithContext api (basicAuthServerContext cfg)
-                       (server cfg)
+app cfg = cors (const $ Just corsResourcePolicy) $
+            serveWithContext api (basicAuthServerContext cfg) (server cfg)
+  where
+    corsResourcePolicy = CorsResourcePolicy
+      { corsOrigins = Nothing
+      , corsMethods = ["GET", "POST"]
+      , corsRequestHeaders = ["Authorization"]
+      , corsExposedHeaders = Nothing
+      , corsMaxAge = Nothing
+      , corsVaryOrigin = False
+      , corsRequireOrigin = False
+      , corsIgnoreFailures = False
+      }
 
 server :: ServerConfig -> Server API
 server cfg = enter monadNatTransform server'

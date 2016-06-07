@@ -23,6 +23,7 @@ executable students-big-brother-server
                      , servant
                      , servant-server
                      , wai
+                     , wai-cors
                      , warp
                      , postgresql-simple
                      , students-big-brother-types
