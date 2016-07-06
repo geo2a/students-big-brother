@@ -13,16 +13,20 @@
 -- After that you can execute this script to initialize table like this:
 -- psql -U students_big_brother -d students_big_brother_db -h localhost -a -f db_init.sql
 
+CREATE TYPE user_role AS ENUM ('admin', 'teacher');
+
+CREATE TABLE users ( user_id serial PRIMARY KEY
+                   , username varchar(32) NOT NULL
+                   , password varchar(32) NOT NULL -- security? Ha-Ha.
+                   , role user_role NOT NULL
+                   );
+
 CREATE TABLE files ( file_id serial PRIMARY KEY
                    , file_path varchar(32) NOT NULL
                    , file_contents varchar(4096)
                    , student_id integer NOT NULL
                    );
 
-CREATE TABLE teachers ( teacher_id serial PRIMARY KEY
-                      , username varchar(32) NOT NULL
-                      , password varchar(32) NOT NULL -- security? Ha-Ha.
-                      );
 
 CREATE TABLE students ( student_id integer PRIMARY KEY
                       , first_name varchar(32) NOT NULL

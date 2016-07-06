@@ -77,22 +77,32 @@ dbAddStudent conn (Student sId fname mname lname) = do
 dbAddTeacher :: Connection -> Credential -> IO Int
 dbAddTeacher conn (Credential uname pwd) = do
   teacher_id :: [Only Int] <- query conn [sql|
-    INSERT INTO teachers (teacher_id, username, password)
-      VALUES (DEFAULT,?,?) RETURNING teacher_id
+    INSERT INTO users (user_id, username, password, role)
+      VALUES (DEFAULT,?,?, 'teacher') RETURNING user_id
   |] (uname, pwd)
   return . fromOnly . head $ teacher_id
 
 dbLookupTeacher :: Connection -> Credential -> IO Bool
-dbLookupTeacher conn (Credential uname pwd) = do
-  student_id :: [Only Int] <- query conn [sql|
-    SELECT teacher_id FROM teachers WHERE username = ? AND password = ?
-  |] (uname, pwd)
-  return . not . null $ student_id
+dbLookupTeacher conn (Credential uname _) = do
+  user_id :: [Only Int] <- query conn [sql|
+    SELECT user_id FROM users WHERE username = ?
+      WHERE role = 'teacher'
+  |] (Only uname)
+  return . not . null $ user_id
+
+dbLookupAdmin :: Connection -> Credential -> IO Bool
+dbLookupAdmin conn (Credential uname _) = do
+  user_id :: [Only Int] <- query conn [sql|
+    SELECT user_id FROM users WHERE username = ?
+      WHERE role = 'admin'
+  |] (Only uname)
+  return . not . null $ user_id
 
 dbListTeachers :: Connection -> IO [Teacher]
 dbListTeachers conn = do
   teachers :: [(Int, Username, Password)] <- query_ conn [sql|
-    SELECT * FROM teachers
+    SELECT user_id, username, password FROM users
+      WHERE role = 'teacher'
   |]
   return . map (uncurry Teacher)
          . map (\(a,b,c) -> (a, Credential b c)) $ teachers
@@ -100,5 +110,5 @@ dbListTeachers conn = do
 dbDeleteTeacher :: Connection -> Int -> IO ()
 dbDeleteTeacher conn tid =
   execute conn [sql|
-    DELETE FROM teachers WHERE teacher_id = ?
+    DELETE FROM users WHERE user_id = ?
   |] (Only tid) >> return ()

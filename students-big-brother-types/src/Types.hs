@@ -1,6 +1,8 @@
 {-# LANGUAGE DeriveGeneric,
              DeriveFunctor,
              FlexibleInstances,
+             TypeFamilies,
+             DataKinds,
              OverloadedStrings #-}
 
 module Types where
@@ -58,7 +60,6 @@ data OwnedSourceFile = OwnedSourceFile { student :: Student
 instance FromJSON OwnedSourceFile
 instance ToJSON OwnedSourceFile
 
--- | A user we'll grab from the database when we authenticate someone
 data Teacher = Teacher { teacher_id :: Int
                        , teacher_credential :: Credential
                        }
@@ -66,3 +67,11 @@ data Teacher = Teacher { teacher_id :: Int
 
 instance FromJSON Teacher
 instance ToJSON Teacher
+
+data Admin = Admin { admin_id :: Int
+                   , admin_credential :: Credential
+                   }
+  deriving (Eq, Show, GHC.Generic)
+
+instance FromJSON Admin
+instance ToJSON Admin

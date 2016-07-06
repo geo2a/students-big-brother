@@ -10,7 +10,7 @@ import qualified Data.Text as Text (Text)
 import Types
 
 type TeachersAPI =
-  "files" :> BasicAuth "foo-realm" Teacher :> Get '[JSON] [OwnedSourceFile]
+  "files" :> BasicAuth "Teachers-endpoint" Teacher :> Get '[JSON] [OwnedSourceFile]
 
 type StudentsAPI =
   "files" :> Capture "student_id" StudentId
@@ -21,13 +21,18 @@ type StudentsAPI =
                      :> Post '[JSON] Student
 
 type AdminAPI =
-  "admin" :> ("register-teacher" :> ReqBody '[JSON] Credential
-                                 :> Post '[JSON] Teacher
-              :<|>
-              "list-teachers" :> Get '[JSON] [Teacher]
-              :<|>
-              "delete-teacher" :> ReqBody '[JSON] Int :> Post '[JSON] ()
-              )
+  "admin" :>
+    ( BasicAuth "Admins-endpoint" Admin :> "register-teacher"
+                                        :> ReqBody '[JSON] Credential
+                                        :> Post '[JSON] Teacher
+    :<|>
+      BasicAuth "Admins-endpoint" Admin :> "list-teachers"
+                                        :> Get '[JSON] [Teacher]
+    :<|>
+      BasicAuth "Admins-endpoint" Admin :> "delete-teacher"
+                                        :> ReqBody '[JSON] Int
+                                        :> Post '[JSON] ()
+    )
 
 
 

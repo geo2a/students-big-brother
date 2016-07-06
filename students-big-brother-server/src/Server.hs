@@ -82,8 +82,7 @@ server cfg = enter monadNatTransform server'
           return rows
 
         -- | Substitute existing files list with given
-        updateFiles :: StudentId ->
-                           [SourceFile] -> ReaderT ServerConfig IO ()
+        updateFiles :: StudentId -> [SourceFile] -> ReaderT ServerConfig IO ()
         updateFiles uid files = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
@@ -98,24 +97,25 @@ server cfg = enter monadNatTransform server'
           liftIO $ dbDisconnect dbConnection
           return student
 
-        registerTeacher :: Credential -> ReaderT ServerConfig IO Teacher
-        registerTeacher crd = do
+        registerTeacher :: Admin -> Credential ->
+                             ReaderT ServerConfig IO Teacher
+        registerTeacher admin crd = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
           teacherId <- liftIO $ dbAddTeacher dbConnection crd
           liftIO $ dbDisconnect dbConnection
           return $ Teacher teacherId crd
 
-        listTeachers :: ReaderT ServerConfig IO [Teacher]
-        listTeachers = do
+        listTeachers :: Admin -> ReaderT ServerConfig IO [Teacher]
+        listTeachers admin = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
           teachers <- liftIO $ dbListTeachers dbConnection
           liftIO $ dbDisconnect dbConnection
           return teachers
 
-        deleteTeacher :: Int -> ReaderT ServerConfig IO ()
-        deleteTeacher tid = do
+        deleteTeacher :: Admin -> Int -> ReaderT ServerConfig IO ()
+        deleteTeacher admin tid = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
           liftIO $ dbDeleteTeacher dbConnection tid
@@ -127,8 +127,8 @@ server cfg = enter monadNatTransform server'
           return t
 
 -- | 'BasicAuthCheck' holds the handler we'll use to verify a username and password.
-authCheck :: ServerConfig -> BasicAuthCheck Teacher
-authCheck cfg =
+authTeacherCheck :: ServerConfig -> BasicAuthCheck Teacher
+authTeacherCheck cfg =
   BasicAuthCheck check
   where
     check (BasicAuthData username password) = do
@@ -144,10 +144,28 @@ authCheck cfg =
                                               password')))
           else return Unauthorized
 
+authAdminCheck :: ServerConfig -> BasicAuthCheck Admin
+authAdminCheck cfg =
+  BasicAuthCheck check
+  where
+    check (BasicAuthData username password) = do
+          let username' = decodeUtf8 username
+              password' = decodeUtf8 password
+          dbConnection <- liftIO $ dbConnect $ db cfg
+          adminIsPresent <- dbLookupAdmin dbConnection
+                                              (Credential username' password')
+          liftIO $ dbDisconnect dbConnection
+          if adminIsPresent
+          then return (Authorized (Admin 0
+                                  (Credential username'
+                                              password')))
+          else return Unauthorized
+
+
 -- | We need to supply our handlers with the right Context. In this case,
 -- Basic Authentication requires a Context Entry with the 'BasicAuthCheck' value
 -- tagged with "foo-tag" This context is then supplied to 'server' and threaded
 -- to the BasicAuth HasServer handlers.
 basicAuthServerContext :: ServerConfig ->
-                          Context (BasicAuthCheck Teacher ': '[])
-basicAuthServerContext cfg = authCheck cfg :. EmptyContext
+                          Context (BasicAuthCheck Teacher ': BasicAuthCheck Admin ': '[])
+basicAuthServerContext cfg = authTeacherCheck cfg :. authAdminCheck cfg :. EmptyContext
