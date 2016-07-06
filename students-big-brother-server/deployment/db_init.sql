@@ -11,12 +11,7 @@
 -- CREATE DATABASE students_big_brother_db OWNER students_big_brother;
 
 -- After that you can execute this script to initialize table like this:
--- psql -U students_big_brother -d students_big_brother_db -a -f db_init.sql
-
--- CREATE TABLE students ( student_id serial PRIMARY KEY
---                       , first_name varchar(32)
---                       , last_name  varchar(32)
---                       );
+-- psql -U students_big_brother -d students_big_brother_db -h localhost -a -f db_init.sql
 
 CREATE TABLE files ( file_id serial PRIMARY KEY
                    , file_path varchar(32) NOT NULL
