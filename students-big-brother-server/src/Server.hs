@@ -54,7 +54,10 @@ app cfg = cors (const $ Just corsResourcePolicy) $
     corsResourcePolicy = CorsResourcePolicy
       { corsOrigins = Nothing
       , corsMethods = ["GET", "POST"]
-      , corsRequestHeaders = ["Authorization", "Content-Type"]
+      , corsRequestHeaders = [ "Authorization"
+                             , "Content-Type"
+                             , "Access-Control-Allow-Origin"
+                             ]
       , corsExposedHeaders = Nothing
       , corsMaxAge = Nothing
       , corsVaryOrigin = False
@@ -120,6 +123,29 @@ server cfg = enter monadNatTransform server'
           dbConnection <- liftIO $ dbConnect $ db cfg
           liftIO $ dbDeleteTeacher dbConnection tid
           liftIO $ dbDisconnect dbConnection
+        -- registerTeacher :: Credential ->
+        --                      ReaderT ServerConfig IO Teacher
+        -- registerTeacher crd = do
+        --   cfg <- ask
+        --   dbConnection <- liftIO $ dbConnect $ db cfg
+        --   teacherId <- liftIO $ dbAddTeacher dbConnection crd
+        --   liftIO $ dbDisconnect dbConnection
+        --   return $ Teacher teacherId crd
+        --
+        -- listTeachers :: ReaderT ServerConfig IO [Teacher]
+        -- listTeachers = do
+        --   cfg <- ask
+        --   dbConnection <- liftIO $ dbConnect $ db cfg
+        --   teachers <- liftIO $ dbListTeachers dbConnection
+        --   liftIO $ dbDisconnect dbConnection
+        --   return teachers
+        --
+        -- deleteTeacher :: Int -> ReaderT ServerConfig IO ()
+        -- deleteTeacher tid = do
+        --   cfg <- ask
+        --   dbConnection <- liftIO $ dbConnect $ db cfg
+        --   liftIO $ dbDeleteTeacher dbConnection tid
+        --   liftIO $ dbDisconnect dbConnection
 
     monadNatTransform :: ReaderT ServerConfig IO :~> ExceptT ServantErr IO
     monadNatTransform = Nat $ \r -> do
@@ -169,3 +195,6 @@ authAdminCheck cfg =
 basicAuthServerContext :: ServerConfig ->
                           Context (BasicAuthCheck Teacher ': BasicAuthCheck Admin ': '[])
 basicAuthServerContext cfg = authTeacherCheck cfg :. authAdminCheck cfg :. EmptyContext
+-- basicAuthServerContext :: ServerConfig ->
+--                           Context (BasicAuthCheck Teacher ': '[])
+-- basicAuthServerContext cfg = authTeacherCheck cfg :. EmptyContext

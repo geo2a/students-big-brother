@@ -85,16 +85,16 @@ dbAddTeacher conn (Credential uname pwd) = do
 dbLookupTeacher :: Connection -> Credential -> IO Bool
 dbLookupTeacher conn (Credential uname _) = do
   user_id :: [Only Int] <- query conn [sql|
-    SELECT user_id FROM users WHERE username = ?
-      WHERE role = 'teacher'
+    SELECT user_id FROM users
+      WHERE username = ? AND role = 'teacher'
   |] (Only uname)
   return . not . null $ user_id
 
 dbLookupAdmin :: Connection -> Credential -> IO Bool
 dbLookupAdmin conn (Credential uname _) = do
   user_id :: [Only Int] <- query conn [sql|
-    SELECT user_id FROM users WHERE username = ?
-      WHERE role = 'admin'
+    SELECT user_id FROM users
+      WHERE username = ? AND role = 'admin'
   |] (Only uname)
   return . not . null $ user_id
 

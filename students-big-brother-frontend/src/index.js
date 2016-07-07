@@ -11,24 +11,25 @@ const hostname = cfg.hostname
 
 // const hostname = "http://ec2-54-186-163-30.us-west-2.compute.amazonaws.com/"
 
-// module.exports = function () {
 $("document-ready", function () {
-    $("#login-button").on('click', async function(e) {
-        const username = $("#login-username").val();
-        const password = $("#login-password").val();
-
-        let t = await retrieveStudentsData(username, password)
-
-        updateUI(t)
-
-        // retrieveStudentsData(username, password)();
-        $("#students-list-refresh-button").on('click', async function(e) {
-          t = await retrieveStudentsData(username, password)
-          updateUI(t)
-        });
-        // // setInterval(retrieveStudentsData(username, password), 5000);
-    });
+    $("#login-button").on('click', main);
 })
+
+async function main() {
+    const username = $("#login-username").val();
+    const password = $("#login-password").val();
+
+    let t = await retrieveStudentsData(username, password)
+
+    updateUI(t)
+
+    // retrieveStudentsData(username, password)();
+    $("#students-list-refresh-button").on('click', async function(e) {
+      t = await retrieveStudentsData(username, password)
+      updateUI(t)
+    });
+    // // setInterval(retrieveStudentsData(username, password), 5000);
+}
 
 // Authenticate teacher and ask server for array of students data
 async function retrieveStudentsData(username, password) {
@@ -36,7 +37,7 @@ async function retrieveStudentsData(username, password) {
                        , headers: { 'Accept': 'application/json'
                                   , "Authorization": "Basic " +
                                      btoa(username + ":" + password)
-                         }
+                                  }
                        , mode: "cors"
                        }
   const errorHandler = error => {

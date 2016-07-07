@@ -20,6 +20,20 @@ type StudentsAPI =
   "register-student" :> ReqBody '[JSON] Student
                      :> Post '[JSON] Student
 
+-- type AdminAPI =
+--  "admin" :>
+--    (  "register-teacher"
+--                                        :> ReqBody '[JSON] Credential
+--                                        :> Post '[JSON] Teacher
+--    :<|>
+--       "list-teachers"
+--                                        :> Get '[JSON] [Teacher]
+--    :<|>
+--       "delete-teacher"
+--                                        :> ReqBody '[JSON] Int
+--                                        :> Post '[JSON] ()
+--    )
+
 type AdminAPI =
   "admin" :>
     ( BasicAuth "Admins-endpoint" Admin :> "register-teacher"
