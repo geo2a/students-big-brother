@@ -1,0 +1,12 @@
+<ul class="tabs-menu">
+  {{#each studentsData as |studentsSourceFile|}}
+    <!-- use *.id to force the model hook to fire of link-to transition -->
+      <li>
+        {{#link-to 'students' studentsSourceFile.id}}
+          {{studentsSourceFile.lname}}
+        {{/link-to}}
+      </li>
+  {{else}}
+    Sorry, nobody is here.
+  {{/each}}
+</ul>
