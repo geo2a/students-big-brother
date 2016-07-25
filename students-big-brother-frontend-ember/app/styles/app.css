@@ -31,8 +31,13 @@ footer {
     background-color: rgba(255,255,255,0.75);
 }
 
+.tabs-container {
+  overflow: hidden;
+}
+
 .tabs-menu {
-    height: 30px;
+    width: 100%;
+    padding-bottom: 20px;
     float: left;
     clear: both;
 }
@@ -43,45 +48,32 @@ footer {
     line-height: 30px;
     float: left;
     margin-right: 10px;
-    padding: 3px;
     background-color: #ccc;
-    padding: 5px;
-    text-transform: uppercase;
-    color: #fff;
-    text-decoration: none;
+    padding:5px;
 }
 
-.tabs-menu li a {
-    padding: 10px;
-    text-transform: uppercase;
-    color: #fff;
-    text-decoration: none;
+a {
+  text-transform: uppercase;
+  color: #fff;
+  text-decoration: none;
 }
 
-.tabs-menu li a .active {
-  position: relative;
-  background-color: #fff;
+.active {
   color: #2e7da3;
-  border-bottom: 1px solid #fff;
   z-index: 5;
 }
 
 .tab {
-    /*display: none;*/
-    border: 1px solid #d4d4d1;
+    display: block;
+    /*border: 1px solid #d4d4d1;*/
+    width: 800px;
+    padding: 20px;
     background-color: #fff;
     float: left;
     margin-bottom: 20px;
-    width: auto;
+
 }
 
 .tab-content {
-    width: 800px;
-    padding: 20px;
-    /*display: none;*/
-}
-
-.tab-content li {
-    list-style-type: none;
-    border-bottom: thin solid #888888;
+  border-bottom: thin solid #888888;
 }

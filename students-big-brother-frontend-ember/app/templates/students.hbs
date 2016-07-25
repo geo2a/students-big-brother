@@ -1,6 +1,10 @@
 <div class="tabs-container">
   {{student-tabs-list studentsData=model.allStudents}}
-  {{#each model.currentStudent as |studentData|}}
-    {{students-tab lname=studentData.lname file=studentData.file}}
-  {{/each}}
+  <div class="tab container">
+    {{#each model.currentStudent as |studentData|}}
+      {{students-tab lname=studentData.lname file=studentData.file}}
+    {{else}}
+      This student has no files.
+    {{/each}}
+  </div>
 </div>
