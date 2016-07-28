@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import  _ from 'lodash/lodash';
 
 export default Ember.Route.extend({
   queryParams: {
@@ -8,9 +9,8 @@ export default Ember.Route.extend({
   },
   model(params) {
     return Ember.RSVP.hash({
-      currentStudent: this.get('store')
-        .query('studentSourceFile', { sid: params.student_id }),
-      allStudents: this.get('store').findAll('studentSourceFile')
+      currentStudent: Ember.$.getJSON('/student-source-files?sid=' + params.student_id),
+      allStudents: Ember.$.getJSON('/student-source-files')
     });
   }
 });

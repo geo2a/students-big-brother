@@ -1,7 +1,7 @@
 <div class="student-tabs-list">
   {{#each studentsData as |studentsSourceFile|}}
     <!-- use *.id to force the model hook to fire of link-to transition -->
-      {{#link-to 'students' studentsSourceFile.id
+      {{#link-to 'students' studentsSourceFile.sid
                  class="student-tabs-list__link"}}
         {{studentsSourceFile.lname}}
       {{/link-to}}
