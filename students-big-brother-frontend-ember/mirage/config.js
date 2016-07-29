@@ -1,58 +1,5 @@
 import  _ from 'lodash/lodash';
 
-// const studs = {
-//   data: [{
-//     type: 'studentSourceFile',
-//     id: 1,
-//     attributes: {
-//       sid: 1,
-//       fname:"John",
-//       mname:"",
-//       lname:"Lennon",
-//       file: "#include <cstdlib>"
-//     }
-//   },
-//   {
-//     type: 'studentSourceFile',
-//     id: 5,
-//     attributes: {
-//       sid: 1,
-//       fname:"John",
-//       mname:"",
-//       lname:"Lennon",
-//       file: ""
-//     }
-//   }
-//     , { type: 'student-source-file'
-//       , id: 2
-//       , attributes: { sid: 2
-//                     , fname:"Paul"
-//                     , mname:""
-//                     , lname:"McCartney"
-//                     , file: "verycomplexc++code"
-//                     }
-//       }
-//     , { type: 'student-source-file'
-//       , id: 3
-//       , attributes: { sid: 3
-//                     , fname:"George"
-//                     , mname:""
-//                     , lname:"Harisson"
-//                     , file: "verycomplexc++code"
-//                     }
-//       }
-//     , { type: 'student-source-file'
-//       , id: 4
-//       , attributes: { sid: 4
-//                     , fname:"Ringo"
-//                     , mname:""
-//                     , lname:"Starr"
-//                     , file: "verycomplexc++code"
-//                     }
-//       }
-//     ]
-// };
-
 const studs = {
   data: [
     {
@@ -60,7 +7,8 @@ const studs = {
        fname:"John",
        mname:"",
        lname:"Lennon",
-       file: "#include <cstdlib>"
+       file:
+"#include <cstdlib> \nusing namespace std;\nint main() {}"
     },
     {
       sid: 1,
