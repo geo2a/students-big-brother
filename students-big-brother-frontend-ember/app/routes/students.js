@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import  _ from 'lodash/lodash';
-import cfg from '../config/environment';
+import cfg from 'students-big-brother-frontend-ember/config/environment';
 
 export default Ember.Route.extend({
   queryParams: {
@@ -21,10 +21,15 @@ export default Ember.Route.extend({
       console.log(error)
     }
     return Ember.RSVP.hash({
-      // currentStudent: Ember.$.getJSON('/student-source-files?sid=' + params.student_id),
-      allStudents: fetch("http://" + cfg.SBB_HOST + ":" + cfg.SBB_PORT +
+      currentStudent:
+        fetch("http://" + cfg.APP.SBB_HOST + ":" + cfg.APP.SBB_PORT +
+              "/files?s_id=" + params.student_id, fetchOptions)
+             .then(response => response.json())
+             .catch(errorHandler),
+      allStudents: fetch("http://" + cfg.APP.SBB_HOST + ":" + cfg.APP.SBB_PORT +
                          "/files", fetchOptions)
                         .then(response => response.json())
+                        .then(data => _.uniq(data, 'student.s_id'))
                         .catch(errorHandler)
     });
   }

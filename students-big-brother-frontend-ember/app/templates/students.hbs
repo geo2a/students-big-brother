@@ -3,7 +3,7 @@
   {{student-tabs-list studentsData=model.allStudents}}
 </div>
 <div class="container container_theme_simple">
-  {{#each model.allStudents as |studentData|}}
+  {{#each model.currentStudent as |studentData|}}
     {{students-tab filename=studentData.file.path file=studentData.file.contents}}
   {{else}}
     This student has no files.

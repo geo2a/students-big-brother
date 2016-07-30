@@ -3,7 +3,7 @@ import Highlight from 'highlight.js';
 
 export function highlightCode([code, ...rest]) {
   Highlight.configure({
-    languages: ["cpp"]
+    languages: ["cpp", "pascal", "x86asm", "haskell"]
   });
   // console.log(Highlight.highlightAuto(code));
   return Highlight.highlightAuto(code).value;

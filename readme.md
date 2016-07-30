@@ -1,22 +1,22 @@
 # Students Big Brother
 
-Some logo here 
+Some logo here
 
 [![Build Status](https://travis-ci.org/geo2a/sbb-travis-test.svg?branch=master)](https://travis-ci.org/geo2a/sbb-travis-test)
 
-## Description 
+## Description
 
 A web service to help teacher in battle with students shyness in programming classroom.
 
 ## Developer's tutorial
 
-The system consists of two main parts: web server and client daemons 
+The system consists of two main parts: web server and client daemons
 
 ### DB initialization
 
 Let's assume you have clear installation of postgresql.
 
-First of all, login as postgre user
+First of all, login as postgres user
 
 ```
 sudo -u postgres psql postgres
@@ -34,18 +34,18 @@ Then create a database
 CREATE DATABASE students_big_brother_db OWNER students_big_brother;
 ```
 
-And now you are able to connect as a newly created user to created newly 
-database and initialise db schema. It can be easily done by this bash command: 
+And now you are able to connect as a newly created user to created newly
+database and initialise db schema. It can be easily done by this bash command:
 
 ```
-$ psql -U students_big_brother -d students_big_brother_db -a -f db_init.sql
-``` 
+$ psql -U students_big_brother -d students_big_brother_db -h localhost-a -f db_init.sql
+```
 
 ### Running a server
 
-You are supposed to have haskell [stack](http://docs.haskellstack.org/en/stable/README.html) installed 
+You are supposed to have haskell [stack](http://docs.haskellstack.org/en/stable/README.html) installed
 
-Run the server: 
+Run the server:
 
 ```
 stack exec students-big-brother-exe -- --server <path_to_server_configuration>
@@ -65,7 +65,7 @@ You can run multiple instances of client daemons with different IDs.
 
 ### Running nodejs http-server to serve static files
 
-You also should host static front-end files with some web-server, for example nodejs http-server: 
+You also should host static front-end files with some web-server, for example nodejs http-server:
 
 ```
 nodejs ~/node_modules/http-server/bin/http-server frontend/
