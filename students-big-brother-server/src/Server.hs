@@ -76,13 +76,18 @@ server cfg = enter monadNatTransform server'
               (registerTeacher :<|> listTeachers :<|> deleteTeacher)
       where
         -- | Obtain all files of all students
-        getFiles :: Teacher -> ReaderT ServerConfig IO [OwnedSourceFile]
-        getFiles teacher = do
+        -- TODO: This function needs heave refactoring (db request optimisation
+        -- based on http query params)
+        getFiles :: Teacher -> Maybe StudentID ->
+                    ReaderT ServerConfig IO [OwnedSourceFile]
+        getFiles teacher sid = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
           rows <- liftIO $ dbSelectAllFiles dbConnection
           liftIO $ dbDisconnect dbConnection
-          return rows
+          case sid of
+            Just x -> return . filter (\t -> (s_id . student $ t) == x) $ rows
+            Nothing -> return rows
 
         -- | Substitute existing files list with given
         updateFiles :: StudentId -> [SourceFile] -> ReaderT ServerConfig IO ()

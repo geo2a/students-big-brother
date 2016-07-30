@@ -10,7 +10,9 @@ import qualified Data.Text as Text (Text)
 import Types
 
 type TeachersAPI =
-  "files" :> BasicAuth "Teachers-endpoint" Teacher :> Get '[JSON] [OwnedSourceFile]
+  "files" :> BasicAuth "Teachers-endpoint" Teacher :>
+             QueryParam "s_id" StudentId :>
+             Get '[JSON] [OwnedSourceFile]
 
 type StudentsAPI =
   "files" :> Capture "student_id" StudentId
