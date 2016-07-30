@@ -20,6 +20,11 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
+    ENV.APP.SBB_USER_NAME = "123"
+    ENV.APP.SBB_USER_PASSWORD = "123"
+    ENV.APP.SBB_HOST = "localhost"
+    ENV.APP.SBB_PORT = "8083"
+
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;

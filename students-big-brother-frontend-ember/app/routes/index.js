@@ -1,23 +1,22 @@
 import Ember from 'ember';
+import cfg from '../config/environment';
 
 export default Ember.Route.extend({
   model(params) {
-    const username = "AlanTuring"
-    const password = "123"
-    const hostname = "localhost"
     const fetchOptions = { method: "GET"
                          , headers: { 'Accept': 'application/json'
                                     , "Authorization": "Basic " +
-                                       btoa(username + ":" + password)
+                                       btoa(cfg.APP.SBB_USER_NAME + ":" +
+                                            cfg.APP.SBB_USER_PASSWORD)
                                     }
                          , mode: "cors"
                          }
     const errorHandler = error => {
       console.log(error)
     }
-    return fetch("http://" + hostname + ":8083/files", fetchOptions)
-                .then(response => response.json())
-                .catch(errorHandler)
-    // return  Ember.$.getJSON('/student-source-files');
+    return fetch("http://" + cfg.SBB_HOST + ":" + cfg.SBB_PORT +
+                         "/files", fetchOptions)
+                        .then(response => response.json())
+                        .catch(errorHandler)
   }
 });

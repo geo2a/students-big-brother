@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import  _ from 'lodash/lodash';
+import cfg from '../config/environment';
 
 export default Ember.Route.extend({
   queryParams: {
@@ -8,23 +9,21 @@ export default Ember.Route.extend({
     }
   },
   model(params) {
-    const username = "AlanTuring"
-    const password = "123"
-    const hostname = "localhost"
     const fetchOptions = { method: "GET"
                          , headers: { 'Accept': 'application/json'
                                     , "Authorization": "Basic " +
-                                       btoa(username + ":" + password)
+                                       btoa(cfg.APP.SBB_USER_NAME + ":" +
+                                            cfg.APP.SBB_USER_PASSWORD)
                                     }
                          , mode: "cors"
                          }
     const errorHandler = error => {
       console.log(error)
     }
-
     return Ember.RSVP.hash({
       // currentStudent: Ember.$.getJSON('/student-source-files?sid=' + params.student_id),
-      allStudents: fetch("http://" + hostname + ":8083/files", fetchOptions)
+      allStudents: fetch("http://" + cfg.SBB_HOST + ":" + cfg.SBB_PORT +
+                         "/files", fetchOptions)
                         .then(response => response.json())
                         .catch(errorHandler)
     });
