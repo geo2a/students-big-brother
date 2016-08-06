@@ -1,24 +1,44 @@
 import Ember from 'ember';
 import  _ from 'lodash/lodash';
-import cfg from 'students-big-brother-frontend-ember/config/environment';
+import ENV from 'students-big-brother-frontend-ember/config/environment';
 
 export default Ember.Route.extend({
+
   model(params) {
-    const fetchOptions = { method: "GET"
-                         , headers: { 'Accept': 'application/json'
-                                    , "Authorization": "Basic " +
-                                       btoa(cfg.APP.SBB_USER_NAME + ":" +
-                                            cfg.APP.SBB_USER_PASSWORD)
-                                    }
-                         , mode: "cors"
-                         }
-    const errorHandler = error => {
-      console.log(error)
-    }
-    return fetch("http://" + cfg.APP.SBB_HOST + ":" + cfg.APP.SBB_PORT +
+    const fetchOptions =
+      { method: "GET"
+      , headers: { 'Accept': 'application/json'
+                 , "Authorization":
+                     `Basic ${localStorage.getItem('user')}`
+                 }
+      , mode: "cors"
+      };
+    const errorHandler = error => console.log(error);
+    return fetch("http://" + ENV.APP.SBB_HOST + ":" + ENV.APP.SBB_PORT +
                          "/files", fetchOptions)
+                        .then(handleErrors)
                         .then(response => response.json())
                         .then(data => _.uniq(data, 'student.s_id'))
-                        .catch(errorHandler)
+                        .catch(errorHandler);
   }
 });
+
+function handleErrors(response) {
+    if (!response.ok) {
+        switch (response.status) {
+          case 403:
+            console.log("Forbidden");
+            break;
+          case 404:
+            console.log("Not found");
+            break;
+          case 401:
+            console.log("Anauthtorized");
+            break;
+          default:
+            console.log(response.statusText);
+        }
+        document.location = "/login";
+    }
+    return response;
+}

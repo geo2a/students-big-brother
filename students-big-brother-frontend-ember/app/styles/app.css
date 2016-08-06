@@ -104,13 +104,46 @@ body {
   text-decoration: none;
 }
 
+
 /************************************
  **** Block 'students-tab' ****
  ************************************/
-
 .students-tab {
   margin: 10px;
   border-bottom: thin solid #888888;
+}
+
+/*****************************
+ **** Block 'log-in-form' ****
+ *****************************/
+
+.log-in-form {
+  margin: auto;
+  width: 175px;
+  padding: 20px 40px 20px 40px;
+  display: block;
+  overflow: hidden;
+  border: thin solid #888888;
+  background-color: rgba(255,255,255,0.75);
+}
+
+.log-in-form__field {
+  width:100%;
+  /*box-sizing: border-box;*/
+  margin-bottom: 10px;
+  height: 35px;
+}
+
+.log-in-form__button {
+    height: 40px;
+    background-color: #2e7da3;
+    /*border: none;*/
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-bottom: 10px;
 }
 
 /***********************

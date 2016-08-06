@@ -1,0 +1,9 @@
+<form class="log-in-form" {{action "authenticate" on="submit"}}>
+  {{input class="log-in-form__field" placeholder="username"
+          type="text" value=username}}
+  {{input class="log-in-form__field" placeholder="password"
+          type="password" value=password}}
+  <button class = "log-in-form__button" type="submit">
+    Log In
+  </button>
+</form>
