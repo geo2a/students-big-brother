@@ -86,7 +86,7 @@ server cfg = enter monadNatTransform server'
           rows <- liftIO $ dbSelectAllFiles dbConnection
           liftIO $ dbDisconnect dbConnection
           case sid of
-            Just x -> return . filter (\t -> (s_id . student $ t) == x) $ rows
+            Just x -> return . filter (\t -> (student_id . student $ t) == x) $ rows
             Nothing -> return rows
 
         -- | Substitute existing files list with given

@@ -1,8 +1,10 @@
 {
-  "student_id": 1,
-  "first_name": "John",
-  "middle_name": "",
-  "last_name": "Lennon",
+  "student" : {
+    "student_id": 1,
+    "first_name": "John",
+    "middle_name": "",
+    "last_name": "Lennon"
+  },
   "ignore": [".", ".."],
   "refresh_rate": 5000000,
   "directory": "./aux/students/student1",

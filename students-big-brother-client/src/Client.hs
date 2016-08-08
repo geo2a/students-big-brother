@@ -7,7 +7,8 @@
              DataKinds,
              TypeOperators,
              RankNTypes,
-             ScopedTypeVariables #-}
+             ScopedTypeVariables,
+             DuplicateRecordFields #-}
 
 module Client where
 
@@ -45,10 +46,7 @@ import Types
 type RefreshInterval = Int
 
 data ClientConfig = ClientConfig
-  { student_id        :: StudentId
-  , first_name        :: Text.Text
-  , middle_name       :: Text.Text
-  , last_name         :: Text.Text
+  { student           :: Student
   , directory         :: FilePath -- ^ path directory to watch
   , refresh_rate      :: RefreshInterval -- ^ refresh rate in seconds
   , ignore            :: [FilePath] -- ^ list of ignored files
@@ -98,14 +96,9 @@ manager = unsafePerformIO $ newManager defaultManagerSettings
 loop :: DemandedEffects r => Eff r ()
 loop = do
   cfg <- ask
-
-  let student = Student (student_id cfg) (first_name cfg)
-                        (middle_name cfg) (last_name cfg)
-      url = (BaseUrl Http (Text.unpack $ server_hostname cfg)
+  let url = (BaseUrl Http (Text.unpack $ server_hostname cfg)
                           (server_port cfg) "")
-
   (state :: ClientState) <- get
-
   dirPath <- lift $ getCurrentDirectory
   currentFilesList <- (\\ ignore cfg) <$>
     (lift $ getDirectoryContents $ dirPath)
@@ -119,7 +112,7 @@ loop = do
       let newState = zipWith3 SourceFile currentFilesList filesContents modificationTimes
       put newState
       lift $ runExceptT $
-        updateFilesList (student_id cfg) newState manager url
+        updateFilesList (student_id $ student (cfg :: ClientConfig)) newState manager url
       return ()
   lift $ threadDelay $ refresh_rate cfg
   loop
@@ -133,13 +126,9 @@ loop = do
 
 -- | Handles all effects produced by application.
 runApp action cfg initState = do
-  let student = Student (student_id cfg) (first_name cfg)
-                        (middle_name cfg) (last_name cfg)
-      url = (BaseUrl Http (Text.unpack $ server_hostname cfg)
+  let url = (BaseUrl Http (Text.unpack $ server_hostname cfg)
                           (server_port cfg) "")
-
-  runExceptT $ registerStudent student manager url
-
+  runExceptT $ registerStudent (student (cfg :: ClientConfig)) manager url
   runLift . runState initState . runReader action $ cfg
 
 startClientDaemon :: String -> IO ()

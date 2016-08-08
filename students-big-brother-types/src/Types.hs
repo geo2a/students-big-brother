@@ -3,7 +3,8 @@
              FlexibleInstances,
              TypeFamilies,
              DataKinds,
-             OverloadedStrings #-}
+             OverloadedStrings,
+             DuplicateRecordFields #-}
 
 module Types where
 
@@ -16,10 +17,10 @@ import Data.Time.Clock (UTCTime)
 
 type StudentId = Int
 
-data Student = Student { s_id   :: StudentId
-                       , f_name :: Text
-                       , m_name :: Text
-                       , l_name :: Text
+data Student = Student { student_id   :: StudentId
+                       , first_name :: Text
+                       , middle_name :: Text
+                       , last_name :: Text
                        } deriving (Eq, Show, GHC.Generic)
 
 instance FromJSON Student
