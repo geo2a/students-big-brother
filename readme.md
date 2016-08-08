@@ -10,7 +10,7 @@ A web service to help teacher in battle with students shyness in programming cla
 
 ## Developer's tutorial
 
-The system consists of two main parts: web server and client daemons
+The system consists of three parts: web server, client daemons and frontend server (teachers Web-interface)
 
 ### DB initialization
 
@@ -38,7 +38,7 @@ And now you are able to connect as a newly created user to created newly
 database and initialise db schema. It can be easily done by this bash command:
 
 ```
-$ psql -U students_big_brother -d students_big_brother_db -h localhost-a -f db_init.sql
+$ psql -U students_big_brother -d students_big_brother_db -h localhost -a -f db_init.sql
 ```
 
 ### Running a server
@@ -48,25 +48,25 @@ You are supposed to have haskell [stack](http://docs.haskellstack.org/en/stable/
 Run the server:
 
 ```
-stack exec students-big-brother-exe -- --server <path_to_server_configuration>
+stack exec students-big-brother-server -- <path_to_server_configuration.json>
 ```
 
-Where path_to_server_configuration if like this: "aux/server-cfg.json"
+You can find example config in students-big-brother-server/example-server-cfg.json
+
 
 ### Running the client daemons
 
 ```
-stack exec students-big-brother-exe -- --client <path_to_client_configuration>
+stack exec students-big-brother-student -- <path_to_client_configuration.json>
 ```
 
-Where path_to_client_configuration if like this: "aux/client-daemon-cfg-1.json"
+You can find example config in students-big-brother-client/example-client-daemon-cfg.json
 
 You can run multiple instances of client daemons with different IDs.
 
-### Running nodejs http-server to serve static files
-
-You also should host static front-end files with some web-server, for example nodejs http-server:
+### Running [Ember.js](http://emberjs.com/) development http-server
 
 ```
-nodejs ~/node_modules/http-server/bin/http-server frontend/
+cd students-big-brother-frontend-ember
+ember s
 ```
