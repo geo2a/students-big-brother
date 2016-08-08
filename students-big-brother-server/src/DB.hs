@@ -14,6 +14,7 @@ import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.FromField
 import Database.PostgreSQL.Simple.ToField
 import Database.PostgreSQL.Simple.SqlQQ
+import Data.Time.Clock (UTCTime)
 
 import API
 import Types
@@ -40,24 +41,25 @@ dbDisconnect = close
 dbSelectAllFiles :: Connection -> IO [OwnedSourceFile]
 dbSelectAllFiles conn = do
   rows <- query_ conn [sql|
-      select file_id, file_path, file_contents
-             , students.student_id, first_name, middle_name, last_name
+      select file_id, file_path, file_contents, modification_time
+           , students.student_id, first_name, middle_name, last_name
         from files
           inner join students on files.student_id = students.student_id;
-    |] :: IO [( Integer, FilePath, Text.Text
+    |] :: IO [( Integer, FilePath, Text.Text, UTCTime
               , StudentID, Text.Text, Text.Text, Text.Text)]
   return $ map readRow rows
     where
-      readRow (_, path, contents, student_id, f_name, m_name, l_name) =
+      readRow (_, path, contents, modification_time
+              , student_id, f_name, m_name, l_name) =
         OwnedSourceFile (Student student_id f_name m_name l_name)
-                        (SourceFile path contents)
+                        (SourceFile path contents modification_time)
 
 dbInsertFile :: Connection -> StudentID -> SourceFile -> IO ()
-dbInsertFile conn student_id (SourceFile path contents) =
+dbInsertFile conn student_id (SourceFile path contents modification_time) =
   execute conn [sql|
-    INSERT INTO files(file_id, file_path, file_contents, student_id) VALUES
-      (DEFAULT, ?, ?, ?)
-  |] (path, contents, student_id) >> return ()
+    INSERT INTO files(file_id, file_path, file_contents, modification_time, student_id) VALUES
+      (DEFAULT, ?, ?, ?, ?)
+  |] (path, contents, modification_time, student_id) >> return ()
 
 dbUpdateFiles :: Connection -> StudentID -> [SourceFile] -> IO ()
 dbUpdateFiles conn student_id files = do

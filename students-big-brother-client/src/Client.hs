@@ -25,7 +25,6 @@ import System.Process
 import System.Directory
 import System.FilePath
 import qualified Data.ByteString.Lazy as BS
-import Data.Time.Clock (UTCTime)
 import Data.List
 import Data.Typeable
 import Data.Aeson
@@ -45,8 +44,6 @@ import Types
 
 type RefreshInterval = Int
 
-type ModificationTime = UTCTime
-
 data ClientConfig = ClientConfig
   { student_id        :: StudentId
   , first_name        :: Text.Text
@@ -59,7 +56,7 @@ data ClientConfig = ClientConfig
   , server_port       :: Int
   } deriving (Typeable, Show, GHC.Generic)
 
-type ClientState = [(SourceFile, ModificationTime)]
+type ClientState = [SourceFile]
 
 instance FromJSON ClientConfig
 instance ToJSON ClientConfig
@@ -75,8 +72,8 @@ type DemandedEffects r =
 ---- Auto generated functions to query servers HTTP API ----
 ------------------------------------------------------------
 
--- | Consult Server module (Server.hs) for API documentation
--- | TODO: restrict client API, client daemon doesn't need to have access to non-student API
+-- | Consult API module (students-big-brother-types/API.hs)
+-- | for API documentation
 updateFilesList :<|> registerStudent = client students_api
 
 --------------------------------
@@ -114,13 +111,13 @@ loop = do
     (lift $ getDirectoryContents $ dirPath)
   modificationTimes <- lift $ mapM getModificationTime currentFilesList
   let timedCurrentFilesList = zip currentFilesList modificationTimes
-  let timedPreviousFilesList = map (\(f, t) -> (path f, t)) state
+  let timedPreviousFilesList = map (\(SourceFile p c t) -> (p, t)) state
   when (not . null $
     timedCurrentFilesList `symmetricDiff` timedPreviousFilesList) $ do
       lift $ putStrLn ("Current files list: " ++ show currentFilesList)
       filesContents <- lift $ mapM Text.IO.readFile currentFilesList
-      let newState = zipWith SourceFile currentFilesList filesContents
-      put (zip newState modificationTimes)
+      let newState = zipWith3 SourceFile currentFilesList filesContents modificationTimes
+      put newState
       lift $ runExceptT $
         updateFilesList (student_id cfg) newState manager url
       return ()

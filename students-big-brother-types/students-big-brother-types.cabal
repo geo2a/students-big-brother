@@ -19,5 +19,6 @@ library
                        , text
                        , servant
                        , servant-server
+                       , time
 
   default-language:    Haskell2010

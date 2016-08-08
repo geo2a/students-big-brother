@@ -24,6 +24,7 @@ CREATE TABLE users ( user_id serial PRIMARY KEY
 CREATE TABLE files ( file_id serial PRIMARY KEY
                    , file_path varchar(32) NOT NULL
                    , file_contents varchar(4096)
+                   , modification_time timestamptz NOT NULL
                    , student_id integer NOT NULL
                    );
 

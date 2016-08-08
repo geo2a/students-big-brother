@@ -12,6 +12,7 @@ import Data.Text (Text, pack)
 import qualified GHC.Generics as GHC (Generic)
 import Data.Typeable (Typeable)
 import Servant.API.BasicAuth (BasicAuthData (BasicAuthData))
+import Data.Time.Clock (UTCTime)
 
 type StudentId = Int
 
@@ -44,9 +45,12 @@ data Credential = Credential { username :: Username
 instance FromJSON Credential
 instance ToJSON Credential
 
+type ModificationTime = UTCTime
+
 -- | Text file with source code
 data SourceFile = SourceFile { path :: FilePath
                              , contents :: Text
+                             , modificationTime :: ModificationTime
                              } deriving (Eq, Show, GHC.Generic)
 
 instance FromJSON SourceFile

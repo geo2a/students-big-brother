@@ -1,8 +1,9 @@
 <div class="students-tab">
-  <h3>{{filename}}</h3>
+  <h3>{{file.path}}</h3>
+  <p>Last modified: {{file.modificationTime}}</p>
   <pre>
     <code>
-{{{highlight-code file}}}
+{{{highlight-code file.contents}}}
     </code>
   </pre>
 </div>

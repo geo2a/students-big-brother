@@ -31,6 +31,7 @@ export default Ember.Route.extend({
                         .then(handleErrors)
                         .then(response => response.json())
                         .then(data => _.uniq(data, 'student.s_id'))
+                        .then(data => _.sortBy(data, 'student.l_name'))
                         .catch(errorHandler)
     });
   }

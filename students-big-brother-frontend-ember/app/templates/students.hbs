@@ -4,7 +4,7 @@
 </div>
 <div class="container container_theme_simple">
   {{#each model.currentStudent as |studentData|}}
-    {{students-tab filename=studentData.file.path file=studentData.file.contents}}
+    {{students-tab file=studentData.file}}
   {{else}}
     This student has no files.
   {{/each}}
