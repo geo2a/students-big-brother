@@ -45,6 +45,8 @@ instance ToJSON ServerConfig
 startServer :: String -> IO ()
 startServer cfgFileName = do
   cfg <- readServerConfig cfgFileName
+  putStrLn $
+    "Students Big Brother Server is listening on port " ++ (show $ port cfg)
   run (port cfg) (app cfg)
 
 app :: ServerConfig -> Application
