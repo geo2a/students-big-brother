@@ -20,6 +20,7 @@ import Control.Eff.Lift
 import Control.Eff.Reader.Lazy
 import Control.Eff.State.Lazy
 import Control.Concurrent
+import Control.Exception
 import qualified GHC.Generics as GHC
 import System.Environment
 import System.Process
@@ -29,6 +30,7 @@ import qualified Data.ByteString.Lazy as BS
 import Data.List
 import Data.Typeable
 import Data.Aeson
+import Data.Monoid
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text.IO
 import Servant
@@ -84,6 +86,76 @@ readClientConfig fname = do
   case eitherDecode contents of
     Left errMsg -> error errMsg
     Right cfg   -> return cfg
+
+---------------------------
+-- Git Commands Wrappers --
+---------------------------
+
+debugDir = "cd /home/geo2a/Desktop/students/student1 && "
+
+-- gitStatus :: IO String
+-- gitStatus = readCreateProcess (shell $ Text.unpack "git status") ""
+--
+-- gitLog :: IO String
+-- gitLog = readCreateProcess (shell "git log") ""
+--
+-- gitDiff :: IO String
+-- gitDiff = readCreateProcess (shell "git diff") ""
+--
+-- gitCommit :: Student -> Text.Text -> IO String
+-- gitCommit student msg =
+--   let author = first_name student <> " " <> last_name student <> "dummy@email.com"
+--   in readCreateProcess (shell . Text.unpack $
+--        "git commit --amend --author=" <> author <> " -m " <> msg) ""
+
+-- data Command a where
+--   Init :: Command Text.Text
+--   CheckIfDirIsARepo :: Command Bool
+--   Status :: Command Text.Text
+--   Log :: Command Text.Text
+--   Diff :: Command Text.Text
+--   Commit :: Student -> Text.Text -> Command Text.Text
+--
+-- git :: Command a -> IO a
+-- git command =
+--   let shellCommand = commandToShell command
+--   in return False
+--   -- in case command of
+--   --   CheckIfDirIsARepo -> do
+--   --     result <- Text.pack $
+--   --       readCreateProcess (shell . Text.unpack $ debugDir <> shellCommand)
+--   --     if null result
+--   --     then return False
+--   --     else return True
+--   --   _ -> (readCreateProcess (shell . Text.unpack $ debugDir <> shellCommand)) ""
+
+
+data Command = Init
+            --  | CheckIfDirIsARepo
+             | Status
+             | Log
+             | Diff
+             | Commit Student Text.Text
+
+git :: Command -> IO String
+git command =
+  let shellCommand = commandToShell command
+  in case command of
+    -- CheckIfDirIsARepo -> return . not . null $
+    --   readCreateProcess (shell . Text.unpack $ debugDir <> shellCommand)
+    _ -> (readCreateProcess (shell . Text.unpack $ debugDir <> shellCommand)) ""
+
+
+commandToShell :: Command -> Text.Text
+commandToShell Status = "git status"
+commandToShell Log    = "git log"
+commandToShell Diff   = "git diff"
+commandToShell (Commit student msg) =
+  let author = first_name student <> " " <>
+               last_name student <> "dummy@email.com"
+  in "git commit --amend --author=" <> author <> " -m " <> msg
+-- commandToShell CheckIfDirIsARepo =
+--   "git rev-parse --is-inside-work-tree 2> /dev/null"
 
 ------------------------
 ---- Business Logic ----
