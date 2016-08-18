@@ -8,7 +8,10 @@
              TypeOperators,
              RankNTypes,
              ScopedTypeVariables,
-             DuplicateRecordFields #-}
+             DuplicateRecordFields,
+             GADTs,
+             StandaloneDeriving,
+             DeriveFunctor #-}
 
 module Client where
 
@@ -19,6 +22,7 @@ import Control.Eff hiding ((:>))
 import Control.Eff.Lift
 import Control.Eff.Reader.Lazy
 import Control.Eff.State.Lazy
+import Control.Eff.Operational
 import Control.Concurrent
 import Control.Exception
 import qualified GHC.Generics as GHC
@@ -91,71 +95,67 @@ readClientConfig fname = do
 -- Git Commands Wrappers --
 ---------------------------
 
-debugDir = "cd /home/geo2a/Desktop/students/student1 && "
+-- debugDir = "cd /home/geo2a/Desktop/students/student1 && "
+debugDir = "cd . &&"
 
--- gitStatus :: IO String
--- gitStatus = readCreateProcess (shell $ Text.unpack "git status") ""
---
--- gitLog :: IO String
--- gitLog = readCreateProcess (shell "git log") ""
---
--- gitDiff :: IO String
--- gitDiff = readCreateProcess (shell "git diff") ""
---
--- gitCommit :: Student -> Text.Text -> IO String
--- gitCommit student msg =
---   let author = first_name student <> " " <> last_name student <> "dummy@email.com"
---   in readCreateProcess (shell . Text.unpack $
---        "git commit --amend --author=" <> author <> " -m " <> msg) ""
+data GitCommand a where
+  Init :: GitCommand Text.Text
+  CheckIfDirIsARepo :: GitCommand Bool
+  Status :: GitCommand Text.Text
+  Log :: GitCommand Text.Text
+  Diff :: GitCommand Text.Text
+  Commit :: Student -> Text.Text -> GitCommand Text.Text
+    deriving (Typeable)
 
--- data Command a where
---   Init :: Command Text.Text
---   CheckIfDirIsARepo :: Command Bool
---   Status :: Command Text.Text
---   Log :: Command Text.Text
---   Diff :: Command Text.Text
---   Commit :: Student -> Text.Text -> Command Text.Text
---
--- git :: Command a -> IO a
--- git command =
---   let shellCommand = commandToShell command
---   in return False
---   -- in case command of
---   --   CheckIfDirIsARepo -> do
---   --     result <- Text.pack $
---   --       readCreateProcess (shell . Text.unpack $ debugDir <> shellCommand)
---   --     if null result
---   --     then return False
---   --     else return True
---   --   _ -> (readCreateProcess (shell . Text.unpack $ debugDir <> shellCommand)) ""
-
-
-data Command = Init
-            --  | CheckIfDirIsARepo
-             | Status
-             | Log
-             | Diff
-             | Commit Student Text.Text
-
-git :: Command -> IO String
-git command =
-  let shellCommand = commandToShell command
-  in case command of
-    -- CheckIfDirIsARepo -> return . not . null $
-    --   readCreateProcess (shell . Text.unpack $ debugDir <> shellCommand)
-    _ -> (readCreateProcess (shell . Text.unpack $ debugDir <> shellCommand)) ""
-
-
-commandToShell :: Command -> Text.Text
-commandToShell Status = "git status"
-commandToShell Log    = "git log"
-commandToShell Diff   = "git diff"
-commandToShell (Commit student msg) =
+-- | Then, implements interpreters from the data to effects.
+gitIO :: SetMember Lift (Lift IO) r => GitCommand a -> Eff r a
+gitIO Init = lift $ exec "git init"
+gitIO CheckIfDirIsARepo = do
+  t <- lift $ exec "git rev-parse --is-inside-work-tree 2> /dev/null"
+  return . not . Text.null $ t
+gitIO Status = lift $ exec "git status"
+gitIO Log = lift $ exec "git log"
+gitIO Diff = lift $ exec "git diff"
+gitIO (Commit student msg) =
   let author = first_name student <> " " <>
                last_name student <> "dummy@email.com"
-  in "git commit --amend --author=" <> author <> " -m " <> msg
--- commandToShell CheckIfDirIsARepo =
---   "git rev-parse --is-inside-work-tree 2> /dev/null"
+  in lift . exec $ "git commit --amend --author=" <> author <> " -m " <> msg
+
+exec cmd = Text.pack <$>
+  readCreateProcess (shell $ Text.unpack $ debugDir <> cmd) ""
+
+-- prog :: Member (Program GitCommand) r => Eff r ()
+prog = runLift . runProgram gitIO $ do
+  singleton CheckIfDirIsARepo
+
+-- data GitCommand = Init
+--                 | CheckIfDirIsARepo
+--                 | Status
+--                 | Log
+--                 | Diff
+--                 | Commit Student Text.Text
+--
+-- data GitOutput = TextualOutput Text.Text | BoolOutput Bool
+--   deriving (Show)
+--
+-- git :: GitCommand -> IO GitOutput
+-- git cmd =
+--   let spawnCmd = readCreateProcess (shell $
+--                    Text.unpack $ debugDir <> (commandToShell cmd)) ""
+--   in case cmd of
+--     CheckIfDirIsARepo -> BoolOutput . not . null <$> spawnCmd
+--     _ -> TextualOutput . Text.pack <$> spawnCmd
+--   where
+--     commandToShell :: GitCommand -> Text.Text
+--     commandToShell Status = "git status"
+--     commandToShell Log    = "git log"
+--     commandToShell Diff   = "git diff"
+--     commandToShell (Commit student msg) =
+--       let author = first_name student <> " " <>
+--                    last_name student <> "dummy@email.com"
+--       in "git commit --amend --author=" <> author <> " -m " <> msg
+--     commandToShell CheckIfDirIsARepo =
+--       "git rev-parse --is-inside-work-tree 2> /dev/null"
 
 ------------------------
 ---- Business Logic ----
