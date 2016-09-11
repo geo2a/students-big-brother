@@ -1,9 +1,9 @@
 <div class="student-tabs-list">
   {{#each studentsData as |studentsSourceFile|}}
     <!-- use *.id to force the model hook to fire of link-to transition -->
-      {{#link-to 'students' studentsSourceFile.student.s_id
+      {{#link-to 'students' studentsSourceFile.student.student_id
                  class="student-tabs-list__link"}}
-        {{studentsSourceFile.student.l_name}}
+        {{studentsSourceFile.student.last_name}}
       {{/link-to}}
   {{else}}
     Sorry, nobody is here.

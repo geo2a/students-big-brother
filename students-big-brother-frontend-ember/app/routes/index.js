@@ -18,7 +18,7 @@ export default Ember.Route.extend({
                          "/files", fetchOptions)
                         .then(handleErrors)
                         .then(response => response.json())
-                        .then(data => _.uniq(data, 'student.s_id'))
+                        .then(data => _.uniq(data, 'student.student_id'))
                         .catch(errorHandler);
   }
 });
