@@ -95,67 +95,72 @@ readClientConfig fname = do
 -- Git Commands Wrappers --
 ---------------------------
 
+data GitCommand = Init
+                | CheckIfDirIsARepo
+                | Status
+                | Log
+                | Diff
+                | Commit Student Text.Text
+
+data GitOutput = TextualOutput Text.Text | BoolOutput Bool
+
+instance Show GitOutput where
+  show (TextualOutput t) = show t
+  show (BoolOutput b) = show b
+
+
+git :: GitCommand -> IO GitOutput
+git cmd =
+  let spawnCmd = readCreateProcess (shell $
+                   Text.unpack $ (commandToShell cmd)) ""
+  in case cmd of
+    CheckIfDirIsARepo -> BoolOutput . not . null <$> spawnCmd
+    _ -> TextualOutput . Text.pack <$> spawnCmd
+  where
+    commandToShell :: GitCommand -> Text.Text
+    commandToShell Status = "git status"
+    commandToShell Log    = "git log"
+    commandToShell Diff   = "git diff"
+    commandToShell (Commit student msg) =
+      let author = first_name student <> " " <>
+                   last_name student <> "dummy@email.com"
+      in "git commit --amend --author=" <> author <> " -m " <> msg
+    commandToShell CheckIfDirIsARepo =
+         "git rev-parse --is-inside-work-tree 2>/dev/null"
+
 -- debugDir = "cd /home/geo2a/Desktop/students/student1 && "
-debugDir = "cd . &&"
-
-data GitCommand a where
-  Init :: GitCommand Text.Text
-  CheckIfDirIsARepo :: GitCommand Bool
-  Status :: GitCommand Text.Text
-  Log :: GitCommand Text.Text
-  Diff :: GitCommand Text.Text
-  Commit :: Student -> Text.Text -> GitCommand Text.Text
-    deriving (Typeable)
-
--- | Then, implements interpreters from the data to effects.
-gitIO :: SetMember Lift (Lift IO) r => GitCommand a -> Eff r a
-gitIO Init = lift $ exec "git init"
-gitIO CheckIfDirIsARepo = do
-  t <- lift $ exec "git rev-parse --is-inside-work-tree 2> /dev/null"
-  return . not . Text.null $ t
-gitIO Status = lift $ exec "git status"
-gitIO Log = lift $ exec "git log"
-gitIO Diff = lift $ exec "git diff"
-gitIO (Commit student msg) =
-  let author = first_name student <> " " <>
-               last_name student <> "dummy@email.com"
-  in lift . exec $ "git commit --amend --author=" <> author <> " -m " <> msg
-
-exec cmd = Text.pack <$>
-  readCreateProcess (shell $ Text.unpack $ debugDir <> cmd) ""
-
--- prog :: Member (Program GitCommand) r => Eff r ()
-prog = runLift . runProgram gitIO $ do
-  singleton CheckIfDirIsARepo
-
--- data GitCommand = Init
---                 | CheckIfDirIsARepo
---                 | Status
---                 | Log
---                 | Diff
---                 | Commit Student Text.Text
+-- debugDir = "cd . &&"
 --
--- data GitOutput = TextualOutput Text.Text | BoolOutput Bool
---   deriving (Show)
+-- data GitCommand a where
+--   Init :: GitCommand Text.Text
+--   CheckIfDirIsARepo :: GitCommand Bool
+--   Status :: GitCommand Text.Text
+--   Log :: GitCommand Text.Text
+--   Diff :: GitCommand Text.Text
+--   Commit :: Student -> Text.Text -> GitCommand Text.Text
+--     deriving (Typeable)
 --
--- git :: GitCommand -> IO GitOutput
--- git cmd =
---   let spawnCmd = readCreateProcess (shell $
---                    Text.unpack $ debugDir <> (commandToShell cmd)) ""
---   in case cmd of
---     CheckIfDirIsARepo -> BoolOutput . not . null <$> spawnCmd
---     _ -> TextualOutput . Text.pack <$> spawnCmd
---   where
---     commandToShell :: GitCommand -> Text.Text
---     commandToShell Status = "git status"
---     commandToShell Log    = "git log"
---     commandToShell Diff   = "git diff"
---     commandToShell (Commit student msg) =
---       let author = first_name student <> " " <>
---                    last_name student <> "dummy@email.com"
---       in "git commit --amend --author=" <> author <> " -m " <> msg
---     commandToShell CheckIfDirIsARepo =
---       "git rev-parse --is-inside-work-tree 2> /dev/null"
+-- -- | Then, implement interpreters from data to effects.
+-- gitIO :: SetMember Lift (Lift IO) r => GitCommand a -> Eff r a
+-- gitIO Init = lift $ exec "git init"
+-- gitIO CheckIfDirIsARepo = do
+--   t <- lift $ exec "git rev-parse --is-inside-work-tree 2> /dev/null"
+--   return . not . Text.null $ t
+-- gitIO Status = lift $ exec "git status"
+-- gitIO Log = lift $ exec "git log"
+-- gitIO Diff = lift $ exec "git diff"
+-- gitIO (Commit student msg) =
+--   let author = first_name student <> " " <>
+--                last_name student <> email
+--   in lift . exec $ "git commit --amend --author=" <> author <> " -m " <> msg
+--   where email = "dummy@email.com"
+--
+-- exec cmd = Text.pack <$>
+--   readCreateProcess (shell $ Text.unpack $ debugDir <> cmd) ""
+--
+-- gitActions :: Member (Program GitCommand) r => Eff r Bool
+-- gitActions = do
+--   singleton CheckIfDirIsARepo
 
 ------------------------
 ---- Business Logic ----
@@ -192,6 +197,16 @@ loop = do
       symmetricDiff :: Eq a => [a] -> [a] -> [a]
       symmetricDiff xs ys = (xs `union` ys) \\ (xs `intersect` ys)
 
+loop1 :: DemandedEffects r => Eff r ()
+loop1 = do
+  cfg <- ask
+  dirPath <- lift $ getCurrentDirectory
+  -- (BoolOutput isInRepo) <- lift $ git CheckIfDirIsARepo
+  (TextualOutput diffValue) <- lift $ git Diff
+  when (not . Text.null $ diffValue) $ do
+    lift $ print diffValue
+  lift $ threadDelay $ refresh_rate cfg
+  loop1
 ----------------------------
 ------ Sevice functions ----
 ----------------------------
@@ -205,9 +220,11 @@ runApp action cfg initState = do
 
 startClientDaemon :: String -> IO ()
 startClientDaemon cfgFileName = do
+  putStrLn $
+    "Students Big Brother Client Daemon is running"
   cfg <- readClientConfig cfgFileName
   setCurrentDirectory $ directory cfg
-  runApp loop (cfg :: ClientConfig) (initState :: ClientState)
+  runApp loop1 (cfg :: ClientConfig) (initState :: ClientState)
   return ()
     where
       initState = []
