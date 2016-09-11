@@ -1,10 +1,5 @@
-{-# LANGUAGE TypeOperators
-           , DataKinds
-           , DeriveGeneric
-           , OverloadedStrings
-           , FlexibleContexts
-           , TemplateHaskell
-           , QuasiQuotes #-}
+{-# LANGUAGE TypeOperators, DataKinds, DeriveGeneric,
+    OverloadedStrings, FlexibleContexts #-}
 
 module Server where
 
@@ -46,7 +41,7 @@ startServer :: String -> IO ()
 startServer cfgFileName = do
   cfg <- readServerConfig cfgFileName
   putStrLn $
-    "Students Big Brother Server is listening on port " ++ (show $ port cfg)
+    "Students Big Brother Server is listening on port " ++ show (port cfg)
   run (port cfg) (app cfg)
 
 app :: ServerConfig -> Application
@@ -130,34 +125,10 @@ server cfg = enter monadNatTransform server'
           dbConnection <- liftIO $ dbConnect $ db cfg
           liftIO $ dbDeleteTeacher dbConnection tid
           liftIO $ dbDisconnect dbConnection
-        -- registerTeacher :: Credential ->
-        --                      ReaderT ServerConfig IO Teacher
-        -- registerTeacher crd = do
-        --   cfg <- ask
-        --   dbConnection <- liftIO $ dbConnect $ db cfg
-        --   teacherId <- liftIO $ dbAddTeacher dbConnection crd
-        --   liftIO $ dbDisconnect dbConnection
-        --   return $ Teacher teacherId crd
-        --
-        -- listTeachers :: ReaderT ServerConfig IO [Teacher]
-        -- listTeachers = do
-        --   cfg <- ask
-        --   dbConnection <- liftIO $ dbConnect $ db cfg
-        --   teachers <- liftIO $ dbListTeachers dbConnection
-        --   liftIO $ dbDisconnect dbConnection
-        --   return teachers
-        --
-        -- deleteTeacher :: Int -> ReaderT ServerConfig IO ()
-        -- deleteTeacher tid = do
-        --   cfg <- ask
-        --   dbConnection <- liftIO $ dbConnect $ db cfg
-        --   liftIO $ dbDeleteTeacher dbConnection tid
-        --   liftIO $ dbDisconnect dbConnection
 
     monadNatTransform :: ReaderT ServerConfig IO :~> ExceptT ServantErr IO
-    monadNatTransform = Nat $ \r -> do
-          t <- liftIO $ runReaderT r cfg
-          return t
+    monadNatTransform = Nat $ \r -> liftIO $ runReaderT r cfg
+
 
 -- | 'BasicAuthCheck' holds the handler we'll use to verify a username and password.
 authTeacherCheck :: ServerConfig -> BasicAuthCheck Teacher
@@ -202,6 +173,3 @@ authAdminCheck cfg =
 basicAuthServerContext :: ServerConfig ->
                           Context (BasicAuthCheck Teacher ': BasicAuthCheck Admin ': '[])
 basicAuthServerContext cfg = authTeacherCheck cfg :. authAdminCheck cfg :. EmptyContext
--- basicAuthServerContext :: ServerConfig ->
---                           Context (BasicAuthCheck Teacher ': '[])
--- basicAuthServerContext cfg = authTeacherCheck cfg :. EmptyContext

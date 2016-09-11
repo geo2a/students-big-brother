@@ -28,13 +28,6 @@ instance ToJSON Student
 
 type FileId    = Int
 
--- data FullName = FullName { firstName :: Text
---                          , lastName :: Text
---                          } deriving (Eq, Show, GHC.Generic)
-
--- instance FromJSON FullName
--- instance ToJSON FullName
-
 type Password = Text
 
 type Username = Text
@@ -51,7 +44,7 @@ type ModificationTime = UTCTime
 -- | Text file with source code
 data SourceFile = SourceFile { path :: FilePath
                              , contents :: Text
-                             , modificationTime :: ModificationTime
+                             , modification_time :: ModificationTime
                              } deriving (Eq, Show, GHC.Generic)
 
 instance FromJSON SourceFile
