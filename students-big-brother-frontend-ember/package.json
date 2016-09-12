@@ -40,9 +40,12 @@
     "ember-highlight-js": "^1.0.0",
     "ember-load-initializers": "^0.5.1",
     "ember-lodash": "0.0.10",
+    "ember-polyfill-for-tests": "^0.2.0",
     "ember-resolver": "^2.0.3",
     "ember-welcome-page": "^1.0.1",
     "highlight.js": "^9.5.0",
-    "loader.js": "^4.0.1"
+    "loader.js": "^4.0.1",
+    "phantomjs": "^2.1.7",
+    "qunitjs": "^2.0.1"
   }
 }

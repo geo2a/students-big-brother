@@ -7,7 +7,7 @@
   },
   "ignore": [".", ".."],
   "refresh_rate": 5000000,
-  "directory": "./aux/students/student1",
+  "directory": "/home/geo2a/Desktop/students/student1",
   "server_hostname": "localhost",
   "server_port": 8083
 }

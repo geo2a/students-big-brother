@@ -104,11 +104,11 @@ export default function() {
       return {
         data: _.uniq(studs.data, 'sid')
         // data: studs.data
-      }
+      };
     }
     return {
       data:
-        studs.data.filter(s => s.sid == id)
-    }
+        studs.data.filter(s => s.sid === id)
+    };
   });
 }
