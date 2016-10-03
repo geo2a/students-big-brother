@@ -1,9 +1,7 @@
 <div class="students-tab">
   <h3>{{file.path}}</h3>
   <p>Last modified: {{file.modification_time}}</p>
-  <pre>
-    <code>
-{{{highlight-code file.contents}}}
-    </code>
-  </pre>
+  {{#code-block language='pascal'}}
+{{{file.contents}}}
+  {{/code-block}}
 </div>

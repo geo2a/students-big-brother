@@ -45,7 +45,10 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-
+    ENV.APP.SBB_USER_NAME = ""
+    ENV.APP.SBB_USER_PASSWORD = ""
+    ENV.APP.SBB_HOST = "54.213.202.245"
+    ENV.APP.SBB_PORT = "8083"
   }
 
 

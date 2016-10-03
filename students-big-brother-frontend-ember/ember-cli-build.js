@@ -7,7 +7,11 @@ module.exports = function(defaults) {
     babel: {
       includePolyfill: true
     },
-    hinting: false
+    hinting: false,
+    'ember-prism': {
+      'components':['pascal'], //needs to be an array, or undefined.
+      'plugins': ['line-highlight']
+    }
   });
 
   // Use `app.import` to add additional libraries to the generated
