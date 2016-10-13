@@ -1,0 +1,7 @@
+version: "2"
+
+services:
+  ember-frontend:
+    image: registry.gitlab.com/geo2a/students-big-brother-frontend-ember
+    ports:
+      - "4200:4200"
