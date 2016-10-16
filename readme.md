@@ -10,7 +10,8 @@ A web service to help teacher in battle with students shyness in programming cla
 
 ## Developer's tutorial
 
-The system consists of three parts: web server, client daemons and frontend server (teachers Web-interface)
+The system consists of three parts: web server, client daemons and frontend
+server (servers teachers Web-interface)
 
 ### DB initialization
 
@@ -70,3 +71,39 @@ You can run multiple instances of client daemons with different IDs.
 cd students-big-brother-frontend-ember
 ember s
 ```
+
+### Miscellaneous
+
+#### [pgweb](https://github.com/sosedoff/pgweb) -- Postgresql web-based admin tool
+
+Donwload binary from releases tab on github, unzip and run:
+
+docker run -p 8081:8081 sosedoff/pgweb
+
+```
+./pgweb_linux_amd64
+```
+
+## How to deploy using docker and docker-compose
+
+This part assumes that your server has up-to-date
+[docker](https://docs.docker.com/engine/installation/) and
+[docker-compose](https://docs.docker.com/compose/install/) installed
+
+There are 3 private docker images hosted on [gitlab.com](https://gitlab.com)
+container registry. As for now, you need to be me to be able to access them.
+
+First of all you need to login:
+
+```
+docker login registry.gitlab.com
+```
+
+Then you just need to execute following command from project root:
+
+```
+docker-compose up -d
+```
+
+NB: It's better not to forget to perform `ember build -prod`, `stack build`,
+etc. before building image with `docker build`. 
