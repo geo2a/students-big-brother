@@ -22,7 +22,7 @@ module.exports = function(environment) {
   if (environment === 'development') {
     ENV.APP.SBB_USER_NAME = ""
     ENV.APP.SBB_USER_PASSWORD = ""
-    ENV.APP.SBB_HOST = "localhost"
+    ENV.APP.SBB_HOST = "54.213.202.245"
     ENV.APP.SBB_PORT = "8083"
 
     // ENV.APP.LOG_RESOLVER = true;

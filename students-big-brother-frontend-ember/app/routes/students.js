@@ -25,6 +25,7 @@ export default Ember.Route.extend({
         fetch("http://" + ENV.APP.SBB_HOST + ":" + ENV.APP.SBB_PORT +
               "/files?s_id=" + params.student_id, fetchOptions)
              .then(response => response.json())
+            .then(data => _.sortByOrder(data, 'file.modification_time', 'desc'))
              .catch(errorHandler),
       allStudents: fetch("http://" + ENV.APP.SBB_HOST + ":" + ENV.APP.SBB_PORT +
                          "/files", fetchOptions)
