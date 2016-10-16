@@ -5,3 +5,21 @@ services:
     image: registry.gitlab.com/geo2a/students-big-brother-frontend-ember
     ports:
       - "80:80"
+  db:
+    image: registry.gitlab.com/geo2a/students-big-brother-db
+    ports:
+      - "5432:5432"
+    environment:
+      - SBB_DB_PWD # Password for students_big_brother postgres user
+  server:
+    image: registry.gitlab.com/geo2a/students-big-brother-server
+    ports:
+      - "8083:8083"
+    links:
+      - db
+  db-admin:
+    image: donnex/pgweb
+    ports:
+      - "8080:8080"
+    links:
+      - db
