@@ -7,7 +7,8 @@
              DataKinds,
              TypeOperators,
              RankNTypes,
-             ScopedTypeVariables #-}
+             ScopedTypeVariables,
+             DuplicateRecordFields #-}
 
 module Main where
 
@@ -27,32 +28,39 @@ type RefreshInterval = Int
 
 type StudentId = Int
 
-data Student = Student Text.Text Text.Text Text.Text
+data StudentT = StudentT Text.Text Text.Text Text.Text
   deriving (Show, Eq)
 
-parseStudentList :: Text.Text -> [Student]
+parseStudentList :: Text.Text -> [StudentT]
 parseStudentList = map makeStudent . map Text.words .
-                   map (Text.dropWhile (not . isAlpha)) .
-                   filter (isDigit . Text.head) .
+                  --  map (Text.dropWhile (not . isAlpha)) .
+                  --  filter (isDigit . Text.head) .
                    filter (not . Text.null) . Text.lines
-  where makeStudent [f,m,l] = Student f m l
+  where makeStudent [f,l] = StudentT f "" l
+        -- makeStudent [f,m,l] = StudentT f m l
 
-makeConfigs :: [Student] -> [ClientConfig]
+makeConfigs :: [StudentT] -> [ClientConfig]
 makeConfigs = map makeClientConfig . zip [1..]
   where makeDir studentId  = "code"
         refreshRate        = 5000000
         ignore             = [".", ".."]
-        serverHostname     = "ec2-54-186-163-30.us-west-2.compute.amazonaws.com"
+        serverHostname     = "ec2-54-213-202-245.us-west-2.compute.amazonaws.com"
         serverPort         = 8083
-        makeClientConfig (sid, Student l f m) =
-          ClientConfig sid f m l (makeDir sid)
+        makeClientConfig (sid, StudentT l f m) =
+          ClientConfig (Student sid f m l) (makeDir sid)
                        refreshRate ignore serverHostname serverPort
 
+data Student = Student { student_id   :: StudentId
+                        , first_name :: Text.Text
+                        , middle_name :: Text.Text
+                        , last_name :: Text.Text
+                        } deriving (Eq, Show, GHC.Generic)
+
+instance FromJSON Student
+instance ToJSON Student
+
 data ClientConfig = ClientConfig
-  { student_id        :: StudentId
-  , first_name        :: Text.Text
-  , middle_name       :: Text.Text
-  , last_name         :: Text.Text
+  { student           :: Student
   , directory         :: FilePath -- ^ path directory to watch
   , refresh_rate      :: RefreshInterval -- ^ refresh rate in seconds
   , ignore            :: [FilePath] -- ^ list of ignored files
@@ -68,12 +76,12 @@ main = do
   [fname] <- getArgs
   result <- makeConfigs . parseStudentList <$> Text.IO.readFile fname
   setCurrentDirectory "out"
-  let dirNames = map (Text.unpack . last_name) $ result
+  let dirNames = map (Text.unpack . last_name . student) $ result
       fnames   = repeat "cfg.json"
                 --  map (++ ".json")
                 --  . map (Text.unpack . last_name) $ result
-      files    = map encodePretty result
-      exe      = "students-big-brother-exe.exe"
+      files    = map encode result
+      exe      = "students-big-brother-client.exe"
       runner   = "run.bat"
   forM_ (zip3 dirNames fnames files) $ \(dir, fname, file) -> do
     createDirectory dir
