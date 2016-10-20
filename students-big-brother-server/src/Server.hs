@@ -14,8 +14,12 @@ import Data.Text.Encoding (decodeUtf8)
 import qualified Network.Wai as WAI
 import Network.Wai.Handler.Warp
 import Network.Wai.Middleware.Cors
+-- import Network.Wai.Logger (withStdoutLogger, ApacheLogger)
+import Network.Wai.Middleware.RequestLogger
 import Network.Wai
 import Servant
+import System.IO.Unsafe (unsafePerformIO)
+import Data.Default (Default (def))
 
 import Types
 import API
@@ -44,9 +48,17 @@ startServer cfgFileName = do
     "Students Big Brother Server is listening on port " ++ show (port cfg)
   run (port cfg) (app cfg)
 
+-- note that this is equivalent to Application -> Application
+-- logAllMiddleware :: Application -> Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
+-- logAllMiddleware app req respond = do
+--     -- print =<< requestBody req
+--     -- BS.appendFile "sbb.log" =<< strictRequestBody req
+--     app req respond
+
 app :: ServerConfig -> Application
 app cfg = cors (const $ Just corsResourcePolicy) $
-            serveWithContext api (basicAuthServerContext cfg) (server cfg)
+          -- logAllMiddleware $
+          serveWithContext api (basicAuthServerContext cfg) (server cfg)
   where
     corsResourcePolicy = CorsResourcePolicy
       { corsOrigins = Nothing

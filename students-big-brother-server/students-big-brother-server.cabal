@@ -19,11 +19,13 @@ executable students-big-brother-server
                      , transformers
                      , text
                      , bytestring
+                     , data-default
                      , aeson
                      , servant
                      , servant-server
                      , wai
                      , wai-cors
+                     , wai-extra
                      , warp
                      , time
                      , postgresql-simple
