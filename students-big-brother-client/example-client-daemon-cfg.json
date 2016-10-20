@@ -1,13 +1,13 @@
 {
   "student" : {
-    "student_id": 1,
-    "first_name": "John",
+    "student_id": 10,
+    "first_name": "Вася",
     "middle_name": "",
-    "last_name": "Lennon"
+    "last_name": "Я"
   },
-  "ignore": [".", ".."],
+  "ignore": [".", "..", ".git"],
   "refresh_rate": 5000000,
   "directory": "/home/geo2a/Desktop/students/student1",
-  "server_hostname": "localhost",
+  "server_hostname": "ec2-54-213-202-245.us-west-2.compute.amazonaws.com",
   "server_port": 8083
 }

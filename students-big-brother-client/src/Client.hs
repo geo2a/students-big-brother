@@ -35,6 +35,7 @@ import Servant
 import Servant.Client
 import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
 import System.IO.Unsafe (unsafePerformIO)
+import GHC.IO.Encoding (setLocaleEncoding, utf8)
 
 import API
 import Types
@@ -133,6 +134,7 @@ runApp action cfg initState = do
 
 startClientDaemon :: String -> IO ()
 startClientDaemon cfgFileName = do
+  setLocaleEncoding utf8
   cfg <- readClientConfig cfgFileName
   setCurrentDirectory $ directory cfg
   runApp loop (cfg :: ClientConfig) (initState :: ClientState)
