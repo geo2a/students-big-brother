@@ -2,22 +2,26 @@ version: "2"
 
 services:
   ember-frontend:
+    container_name: sbb-frontend
     image: registry.gitlab.com/geo2a/students-big-brother-frontend-ember
     ports:
       - "80:80"
   db:
+    container_name: sbb-db
     image: registry.gitlab.com/geo2a/students-big-brother-db
     ports:
       - "5432:5432"
     environment:
       - SBB_DB_PWD # Password for students_big_brother postgres user
   server:
+    container_name: sbb-server
     image: registry.gitlab.com/geo2a/students-big-brother-server
     ports:
       - "8083:8083"
     links:
       - db
   db-admin:
+    container_name: sbb-db-admin
     image: donnex/pgweb
     ports:
       - "8080:8080"

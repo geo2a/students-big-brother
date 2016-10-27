@@ -17,6 +17,11 @@ cabal.sandbox.config
 *.hp
 .stack-work/
 
+# Server cfg #
+##############
+
+students-big-brother-server/sbb-config.json
+
 # JS #
 ######
 node_modules
@@ -34,7 +39,7 @@ frontend/dist
 
 # compiled output
 dist
-tmp
+client_configs
 
 # dependencies
 node_modules
@@ -47,7 +52,7 @@ bower_components
 /libpeerconnection.log
 npm-debug.log
 testem.log
-
+tmp/
 
 # misc #
 ########
