@@ -36,6 +36,7 @@ import Servant.Client
 import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
 import System.IO.Unsafe (unsafePerformIO)
 import GHC.IO.Encoding
+import System.FilePath.Glob
 
 import API
 import Types
@@ -101,7 +102,9 @@ loop = do
                           (server_port cfg) "")
   (state :: ClientState) <- get
   dirPath <- lift $ getCurrentDirectory
-  currentFilesList <- (\\ ignore cfg) <$>
+  ignored_files <- lift $ map (makeRelative dirPath) <$>
+                       foldMap glob (ignore cfg)
+  currentFilesList <- (\\ ignored_files) <$>
     (lift $ getDirectoryContents $ dirPath)
   modificationTimes <- lift $ mapM getModificationTime currentFilesList
   let timedCurrentFilesList = zip currentFilesList modificationTimes

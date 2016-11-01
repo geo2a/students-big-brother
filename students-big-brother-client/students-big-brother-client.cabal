@@ -30,6 +30,7 @@ executable students-big-brother-client
                      , filepath
                      , time
                      , students-big-brother-types
+                     , Glob
   default-language:    Haskell2010
   other-modules: Client
 
