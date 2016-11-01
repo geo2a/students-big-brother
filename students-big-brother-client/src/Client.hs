@@ -35,7 +35,7 @@ import Servant
 import Servant.Client
 import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
 import System.IO.Unsafe (unsafePerformIO)
-import GHC.IO.Encoding (setLocaleEncoding, utf8)
+import GHC.IO.Encoding
 
 import API
 import Types
@@ -109,7 +109,8 @@ loop = do
   when (not . null $
     timedCurrentFilesList `symmetricDiff` timedPreviousFilesList) $ do
       lift $ putStrLn ("Current files list: " ++ show currentFilesList)
-      filesContents <- lift $ mapM Text.IO.readFile currentFilesList
+      t <- lift $ mapM readFile currentFilesList
+      let filesContents = map Text.pack t
       let newState = zipWith3 SourceFile currentFilesList filesContents modificationTimes
       put newState
       lift $ runExceptT $
@@ -134,7 +135,8 @@ runApp action cfg initState = do
 
 startClientDaemon :: String -> IO ()
 startClientDaemon cfgFileName = do
-  setLocaleEncoding utf8
+  cp1251 <- mkTextEncoding "CP1251"
+  setLocaleEncoding cp1251
   cfg <- readClientConfig cfgFileName
   setCurrentDirectory $ directory cfg
   runApp loop (cfg :: ClientConfig) (initState :: ClientState)
