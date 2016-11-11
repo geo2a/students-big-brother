@@ -22,7 +22,7 @@ psql -v ON_ERROR_STOP=1 -U students_big_brother -d students_big_brother_db <<-EO
 
     CREATE TABLE files ( file_id serial PRIMARY KEY
                        , file_path varchar(32) NOT NULL
-                       , file_contents varchar(4096)
+                       , file_contents varchar(65536)
                        , modification_time timestamptz NOT NULL
                        , student_id integer NOT NULL
                        );
