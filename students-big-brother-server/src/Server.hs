@@ -1,5 +1,9 @@
-{-# LANGUAGE TypeOperators, DataKinds, DeriveGeneric,
-    OverloadedStrings, FlexibleContexts #-}
+{-# LANGUAGE TypeOperators, 
+             DataKinds, 
+             DeriveGeneric,
+             OverloadedStrings, 
+             FlexibleContexts
+#-}
 
 module Server where
 
@@ -78,7 +82,7 @@ server :: ServerConfig -> Server API
 server cfg = enter monadNatTransform server'
   where
     server' :: ServerT API (ReaderT ServerConfig IO)
-    server' = getFiles
+    server' = (\teacher -> (getFiles :<|> getStudents))
               :<|>
               (updateFiles :<|> registerStudent)
               :<|>
@@ -87,9 +91,9 @@ server cfg = enter monadNatTransform server'
         -- | Obtain all files of all students
         -- TODO: This function needs heave refactoring (db request optimisation
         -- based on http query params)
-        getFiles :: Teacher -> Maybe StudentID ->
+        getFiles :: Maybe StudentID ->
                     ReaderT ServerConfig IO [OwnedSourceFile]
-        getFiles teacher sid = do
+        getFiles sid = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
           rows <- liftIO $ dbSelectAllFiles dbConnection
@@ -97,6 +101,16 @@ server cfg = enter monadNatTransform server'
           case sid of
             Just x -> return . filter (\t -> (student_id . student $ t) == x) $ rows
             Nothing -> return rows
+
+        -- | Obtain all students
+        getStudents :: ReaderT ServerConfig IO [Student]
+        getStudents = do
+          cfg <- ask
+          dbConnection <- liftIO $ dbConnect $ db cfg
+          rows <- liftIO $ dbSelectAllFiles dbConnection
+          liftIO $ dbDisconnect dbConnection
+          return . map student $ rows
+                    
 
         -- | Substitute existing files list with given
         updateFiles :: StudentId -> [SourceFile] -> ReaderT ServerConfig IO ()
