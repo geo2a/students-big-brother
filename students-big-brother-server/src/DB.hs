@@ -30,8 +30,6 @@ instance FromJSON ConnectInfo
 
 type DatabaseConfig = ConnectInfo
 
-type StudentID = Int
-
 dbConnect :: DatabaseConfig -> IO Connection
 dbConnect = connect
 
@@ -46,7 +44,7 @@ dbSelectAllFiles conn = do
         from files
           inner join students on files.student_id = students.student_id;
     |] :: IO [( Integer, FilePath, Text.Text, UTCTime
-              , StudentID, Text.Text, Text.Text, Text.Text)]
+              , StudentId, Text.Text, Text.Text, Text.Text)]
   return $ map readRow rows
     where
       readRow (_, path, contents, modification_time
@@ -54,14 +52,21 @@ dbSelectAllFiles conn = do
         OwnedSourceFile (Student student_id f_name m_name l_name)
                         (SourceFile path contents modification_time)
 
-dbInsertFile :: Connection -> StudentID -> SourceFile -> IO ()
+dbSelectAllStudents :: Connection -> IO [Student]
+dbSelectAllStudents conn = do
+  rows <- query_ conn [sql|
+      select * from students
+    |] :: IO [(StudentId, Text.Text, Text.Text, Text.Text)]
+  return $ map (\(sid, f, m, l) ->  Student sid f m l) rows
+
+dbInsertFile :: Connection -> StudentId -> SourceFile -> IO ()
 dbInsertFile conn student_id (SourceFile path contents modification_time) =
   execute conn [sql|
     INSERT INTO files(file_id, file_path, file_contents, modification_time, student_id) VALUES
       (DEFAULT, ?, ?, ?, ?)
   |] (path, contents, modification_time, student_id) >> return ()
 
-dbUpdateFiles :: Connection -> StudentID -> [SourceFile] -> IO ()
+dbUpdateFiles :: Connection -> StudentId -> [SourceFile] -> IO ()
 dbUpdateFiles conn student_id files = do
   execute conn [sql|
     DELETE FROM files WHERE student_id = ?

@@ -91,7 +91,7 @@ server cfg = enter monadNatTransform server'
         -- | Obtain all files of all students
         -- TODO: This function needs heave refactoring (db request optimisation
         -- based on http query params)
-        getFiles :: Maybe StudentID ->
+        getFiles :: Maybe StudentId ->
                     ReaderT ServerConfig IO [OwnedSourceFile]
         getFiles sid = do
           cfg <- ask
@@ -107,9 +107,9 @@ server cfg = enter monadNatTransform server'
         getStudents = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
-          rows <- liftIO $ dbSelectAllFiles dbConnection
+          rows <- liftIO $ dbSelectAllStudents dbConnection
           liftIO $ dbDisconnect dbConnection
-          return . map student $ rows
+          return rows
                     
 
         -- | Substitute existing files list with given
