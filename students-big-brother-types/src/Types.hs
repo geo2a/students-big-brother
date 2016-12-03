@@ -17,10 +17,11 @@ import Data.Time.Clock (UTCTime)
 
 type StudentId = Int
 
-data Student = Student { student_id   :: StudentId
-                       , first_name :: Text
+data Student = Student { student_id  :: StudentId
+                       , first_name  :: Text
                        , middle_name :: Text
-                       , last_name :: Text
+                       , last_name   :: Text
+                       , teacher_id  :: TeacherId
                        } deriving (Eq, Show, GHC.Generic)
 
 instance FromJSON Student
@@ -58,7 +59,9 @@ data OwnedSourceFile = OwnedSourceFile { student :: Student
 instance FromJSON OwnedSourceFile
 instance ToJSON OwnedSourceFile
 
-data Teacher = Teacher { teacher_id :: Int
+type TeacherId = Int
+
+data Teacher = Teacher { teacher_id :: TeacherId
                        , teacher_credential :: Credential
                        }
   deriving (Eq, Show, GHC.Generic)

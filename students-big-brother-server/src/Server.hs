@@ -2,7 +2,8 @@
              DataKinds, 
              DeriveGeneric,
              OverloadedStrings, 
-             FlexibleContexts
+             FlexibleContexts,
+             DuplicateRecordFields
 #-}
 
 module Server where
@@ -55,8 +56,8 @@ startServer cfgFileName = do
 -- note that this is equivalent to Application -> Application
 -- logAllMiddleware :: Application -> Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
 -- logAllMiddleware app req respond = do
---     -- print =<< requestBody req
---     -- BS.appendFile "sbb.log" =<< strictRequestBody req
+--     print =<< requestBody req
+--     BS.appendFile "sbb.log" =<< strictRequestBody req
 --     app req respond
 
 app :: ServerConfig -> Application
@@ -82,7 +83,7 @@ server :: ServerConfig -> Server API
 server cfg = enter monadNatTransform server'
   where
     server' :: ServerT API (ReaderT ServerConfig IO)
-    server' = (\teacher -> (getFiles :<|> getStudents))
+    server' = (\t -> (getFiles t :<|> getStudents t))
               :<|>
               (updateFiles :<|> registerStudent)
               :<|>
@@ -91,23 +92,23 @@ server cfg = enter monadNatTransform server'
         -- | Obtain all files of all students
         -- TODO: This function needs heave refactoring (db request optimisation
         -- based on http query params)
-        getFiles :: Maybe StudentId ->
+        getFiles :: Teacher -> Maybe StudentId ->
                     ReaderT ServerConfig IO [OwnedSourceFile]
-        getFiles sid = do
+        getFiles (Teacher t_id _) sid = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
-          rows <- liftIO $ dbSelectAllFiles dbConnection
+          rows <- liftIO $ dbSelectFiles dbConnection t_id
           liftIO $ dbDisconnect dbConnection
           case sid of
             Just x -> return . filter (\t -> (student_id . student $ t) == x) $ rows
             Nothing -> return rows
 
         -- | Obtain all students
-        getStudents :: ReaderT ServerConfig IO [Student]
-        getStudents = do
+        getStudents :: Teacher -> ReaderT ServerConfig IO [Student]
+        getStudents teacher = do
           cfg <- ask
           dbConnection <- liftIO $ dbConnect $ db cfg
-          rows <- liftIO $ dbSelectAllStudents dbConnection
+          rows <- liftIO $ dbSelectStudents dbConnection teacher
           liftIO $ dbDisconnect dbConnection
           return rows
                     
@@ -165,11 +166,11 @@ authTeacherCheck cfg =
           let username' = decodeUtf8 username
               password' = decodeUtf8 password
           dbConnection <- liftIO $ dbConnect $ db cfg
-          teacherIsPresent <- dbLookupTeacher dbConnection
+          teacher_id <- dbLookupTeacher dbConnection
                                               (Credential username' password')
           liftIO $ dbDisconnect dbConnection
-          if teacherIsPresent
-          then return (Authorized (Teacher 0
+          if (teacher_id /= -1)
+          then return (Authorized (Teacher teacher_id
                                   (Credential username'
                                               password')))
           else return Unauthorized

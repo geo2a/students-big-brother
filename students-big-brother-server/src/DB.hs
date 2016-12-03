@@ -1,9 +1,11 @@
-{-# LANGUAGE OverloadedStrings           , FlexibleContexts
+{-# LANGUAGE OverloadedStrings           
+           , FlexibleContexts
            , TemplateHaskell
            , QuasiQuotes
            , DeriveGeneric
            , StandaloneDeriving
-           , ScopedTypeVariables #-}
+           , ScopedTypeVariables
+           , DuplicateRecordFields #-}
 
 module DB where
 
@@ -36,33 +38,37 @@ dbConnect = connect
 dbDisconnect :: Connection -> IO ()
 dbDisconnect = close
 
-dbSelectAllFiles :: Connection -> IO [OwnedSourceFile]
-dbSelectAllFiles conn = do
-  rows <- query_ conn [sql|
-      select file_id, file_path, file_contents, modification_time
-           , students.student_id, first_name, middle_name, last_name
-        from files
-          inner join students on files.student_id = students.student_id;
-    |] :: IO [( Integer, FilePath, Text.Text, UTCTime
-              , StudentId, Text.Text, Text.Text, Text.Text)]
+dbSelectFiles :: Connection -> TeacherId -> IO [OwnedSourceFile]
+dbSelectFiles conn teacher_id = do
+  rows <- query conn [sql|
+      SELECT file_id, file_path, file_contents, modification_time
+           , students.student_id, first_name, middle_name, last_name, teacher_id
+      FROM files
+          INNER JOIN students ON files.student_id = students.student_id
+      WHERE teacher_id = ?;
+    |] (Only teacher_id) :: IO [( Integer, FilePath, Text.Text, UTCTime
+                                , StudentId, Text.Text, Text.Text
+                                , Text.Text, TeacherId)]
   return $ map readRow rows
     where
       readRow (_, path, contents, modification_time
-              , student_id, f_name, m_name, l_name) =
-        OwnedSourceFile (Student student_id f_name m_name l_name)
+              , student_id, f_name, m_name, l_name, teacher_id) =
+        OwnedSourceFile (Student student_id f_name m_name l_name teacher_id)
                         (SourceFile path contents modification_time)
 
-dbSelectAllStudents :: Connection -> IO [Student]
-dbSelectAllStudents conn = do
-  rows <- query_ conn [sql|
-      select * from students
-    |] :: IO [(StudentId, Text.Text, Text.Text, Text.Text)]
-  return $ map (\(sid, f, m, l) ->  Student sid f m l) rows
+dbSelectStudents :: Connection -> Teacher -> IO [Student]
+dbSelectStudents conn (Teacher teacher_id _) = do
+  rows <- query conn [sql|
+      SELECT * FROM students WHERE teacher_id = ?
+    |] (Only teacher_id) -- (Only (2 :: TeacherId)) 
+  -- print $ map (\(sid, f, m, l, tid) ->  Student sid f m l tid) rows 
+  return $ map (\(sid, f, m, l, tid) ->  Student sid f m l tid) rows
 
 dbInsertFile :: Connection -> StudentId -> SourceFile -> IO ()
 dbInsertFile conn student_id (SourceFile path contents modification_time) =
   execute conn [sql|
-    INSERT INTO files(file_id, file_path, file_contents, modification_time, student_id) VALUES
+    INSERT INTO files(file_id, file_path, 
+                file_contents, modification_time, student_id) VALUES
       (DEFAULT, ?, ?, ?, ?)
   |] (path, contents, modification_time, student_id) >> return ()
 
@@ -74,11 +80,13 @@ dbUpdateFiles conn student_id files = do
   mapM_ (dbInsertFile conn student_id) files
 
 dbAddStudent :: Connection -> Student -> IO Int
-dbAddStudent conn (Student sId fname mname lname) = do
-  student_id :: [Only Int] <- query conn [sql|
-    INSERT INTO students (student_id, first_name, middle_name, last_name)
-      VALUES (?,?,?,?) RETURNING student_id
-  |] (sId, fname, mname, lname)
+dbAddStudent conn (Student sId fname mname lname teacher_id) = do
+  -- student_id :: [Only Int] <- query conn [sql|
+  student_id <- query conn [sql|
+    INSERT INTO students ( student_id, first_name
+                         , middle_name, last_name, teacher_id)
+      VALUES (?,?,?,?,?) RETURNING student_id
+  |] (sId, fname, mname, lname, teacher_id)
   return . fromOnly . head $ student_id
 
 dbAddTeacher :: Connection -> Credential -> IO Int
@@ -89,13 +97,15 @@ dbAddTeacher conn (Credential uname pwd) = do
   |] (uname, pwd)
   return . fromOnly . head $ teacher_id
 
-dbLookupTeacher :: Connection -> Credential -> IO Bool
+dbLookupTeacher :: Connection -> Credential -> IO TeacherId
 dbLookupTeacher conn (Credential uname _) = do
-  user_id :: [Only Int] <- query conn [sql|
+  teacher_id <- query conn [sql|
     SELECT user_id FROM users
       WHERE username = ? AND role = 'teacher'
   |] (Only uname)
-  return . not . null $ user_id
+  case teacher_id of 
+    [] -> return (-1)
+    _  -> return . fromOnly . head $ teacher_id
 
 dbLookupAdmin :: Connection -> Credential -> IO Bool
 dbLookupAdmin conn (Credential uname _) = do

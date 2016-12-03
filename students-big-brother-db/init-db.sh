@@ -32,6 +32,9 @@ psql -v ON_ERROR_STOP=1 -U students_big_brother -d students_big_brother_db <<-EO
                           , first_name varchar(32) NOT NULL
                           , middle_name varchar(32) NOT NULL
                           , last_name varchar(32) NOT NULL
+                          -- It would be great to check if user with 
+                          -- this id actually has role 'teacher'  
+                          , teacher_id integer REFERENCES users (user_id) NOT NULL
                           );
 
     GRANT USAGE, SELECT ON SEQUENCE files_file_id_seq TO students_big_brother;
