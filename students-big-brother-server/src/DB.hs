@@ -1,4 +1,5 @@
-{-# LANGUAGE OverloadedStrings           , FlexibleContexts
+{-# LANGUAGE OverloadedStrings
+           , FlexibleContexts
            , TemplateHaskell
            , QuasiQuotes
            , DeriveGeneric
